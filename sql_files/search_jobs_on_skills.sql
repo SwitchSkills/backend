@@ -1,20 +1,15 @@
-
-WITH interested_user_id AS (
-    SELECT
-    users.user_id
-FROM users
+WITH relevant_regions AS (
+SELECT
+    region_id,
+    region_name,
+    country
+FROM region
 WHERE
-    users.first_name = {first_name}
-    AND users.last_name = {last_name}
+    country = {country}
+    AND region_name IN {region_name_list}
 ),
-liked_jobs AS (
-    SELECT
-        job_id
-    FROM users_like_jobs
-    WHERE
-        user_like_jobs.user_id = interested_user_id.user_id
-),
-    {completed_jobs},
+
+{completed_jobs},
 relevant_jobs AS (
 SELECT
     jobs.job_id,
@@ -26,11 +21,11 @@ SELECT
     jobs.datetime_made_utc,
     jobs.location AS job_location
 FROM jobs
-JOIN liked_jobs ON
-    liked_jobs.job_id = jobs.job_id
+JOIN relevant_regions ON
+    jobs.region_id = region.region_id
     AND jobs.job_id NOT IN completed_jobs.job_id
 ),
-{job_additional_information.sql}
+{job_additional_information}
 SELECT
     relevant_jobs.datetime_made_utc AS datetime_utc,
     relevant_jobs.title,
@@ -55,6 +50,8 @@ JOIN relevant_labels ON
     relevant_jobs.job_id = relevant_labels.job_id
 JOIN owners ON
     relevant_jobs.job_id = owners.job_id
+WHERE
+    labels.label_name IN {search_label_name_list}
 ORDER BY
     relevant_jobs.datetime_made_utc
 ;
