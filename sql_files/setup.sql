@@ -32,12 +32,12 @@ CREATE TABLE IF NOT EXISTS region(
 CREATE TABLE IF NOT EXISTS jobs(
     job_id VARCHAR(200) PRIMARY KEY NOT NULL, #NO PARTITIONING ON TIME BECAUSE IT DIDN'T ALLOW FOR UNIQUE REQUIREMENT ON JOB_ID
     description LONGTEXT NOT NULL,
-    title VARCHAR(200) NOT NULL,
+    title VARCHAR(200) UNIQUE NOT NULL,
     datetime_made_utc DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     datetime_expires_utc DATETIME DEFAULT NULL,
     region_id VARCHAR(200) NOT NULL REFERENCES region(region_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     user_id_owner VARCHAR(200) NOT NULL REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    location VARCHAR(200) DEFAULT NULL,
+    location VARCHAR(200) NOT NULL,
     INDEX (user_id_owner),
     INDEX (region_id)
 );
@@ -63,6 +63,13 @@ CREATE TABLE IF NOT EXISTS user_is_active_in_region(
     INDEX(region_id),
     UNIQUE (user_id,region_id)
 
+);
+
+CREATE TABLE IF NOT EXISTS user_has_labeled_skills(
+  user_id VARCHAR(200) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  label_name VARCHAR(50) REFERENCES labels(label_name) ON DELETE RESTRICT ON UPDATE CASCADE,
+  INDEX(user_id),
+  INDEX(label_name)
 );
 
 CREATE TABLE IF NOT EXISTS job_needs_labeled_skills(

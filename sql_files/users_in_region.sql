@@ -30,9 +30,13 @@ SELECT
     relevant_user_ids.country,
     relevant_user_ids.region_name,
     relevant_picture.picture_data,
-    relevant_picture.picture_description
+    relevant_picture.picture_description,
+    relevant_labels.label_name,
+    relevant_labels.label_description
 FROM users
 JOIN relevant_users ON
     users.user_id = relevant_users.job_id
 LEFT JOIN relevant_pictures_users ON
     users.user_id = relevant_pictures_users.user_id
+JOIN relevant_labels ON
+    users.user_id = relevant_labels.user_id

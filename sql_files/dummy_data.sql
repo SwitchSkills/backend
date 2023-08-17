@@ -185,6 +185,12 @@ INSERT INTO job_needs_labeled_skills(
       'bicycle repair'
      );
 
+INSERT INTO user_has_labeled_skills( user_id, label_name)
+VALUES (
+        'baf6a8a6-0dae-53ac-a75e-0f7e5499cf74',
+        'bicycle repair'
+       );
+
 INSERT INTO users_like_jobs(
                             user_id,
                             job_id
