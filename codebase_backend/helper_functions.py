@@ -49,20 +49,40 @@ def update_user_mapping_with_optional_information(mapping: Dict[str,str], argume
             '{alternative_communication_key}' : 'alternative_communication',
             '{alternative_communication_content}': arguments['alternative_communication']
         })
+    else:
+        mapping.update({
+            '{alternative_communication_key}': str(),
+            '{alternative_communication_content}': str()
+        })
     if arguments.get('{bibliography_key}'):
         mapping.update({
             '{bibliography_key}': 'bibliography',
             '{bibliography_content}': arguments['bibliography']
+        })
+    else:
+        mapping.update({
+            '{bibliography_key}': str(),
+            '{bibliography_content}': str()
         })
     if arguments.get('{rating_key}'):
         mapping.update({
             '{rating_key}': 'rating',
             '{rating_content}': arguments['rating']
         })
+    else:
+        mapping.update({
+            '{rating_key}': str(),
+            '{rating_content}': str()
+        })
     if arguments.get('{number_of_ratings_key}'):
         mapping.update({
             '{number_of_ratings_key}': 'number_of_ratings',
             '{number_of_ratings_content}': arguments['number_of_ratings']
+        })
+    else:
+        mapping.update({
+            '{number_of_ratings_key}': str(),
+            '{number_of_ratings_content}': str()
         })
 
 def verify_and_insert_user(credentials_factory: CredentialsFactory ,database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]) -> str:
@@ -116,6 +136,13 @@ def update_picture_mapping_with_optional_information(mapping_picture: Dict[str,s
             {
                 '{description_key}': 'description',
                 '{description_content}': picture_dict['description']
+            }
+        )
+    else:
+        mapping_picture.update(
+            {
+                '{description_key}': str(),
+                '{description_content}': str()
             }
         )
 def insert_picture_user(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
@@ -218,10 +245,20 @@ def update_job_mapping_with_optional_information(mapping,arguments :  Dict[str,U
             '{datetime_made_utc_key}' : 'datetime_made_utc',
             '{datetime_made_utc_content}': arguments['datetime_made_utc']
         })
+    else:
+        mapping.update({
+            '{datetime_made_utc_key}': str(),
+            '{datetime_made_utc_content}': str()
+        })
     if arguments.get('{datetime_expires_utc_key}'):
         mapping.update({
             '{datetime_expires_utc_key}': 'datetime_expires_utc',
             '{datetime_expires_utc_content}': arguments['datetime_expires_utc']
+        })
+    else:
+        mapping.update({
+            '{datetime_expires_utc_key}': str(),
+            '{datetime_expires_utc_content}': str()
         })
 
 def insert_pictures_job(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector,arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
@@ -262,6 +299,13 @@ def update_picture_job_mapping_with_optional_information(mapping_pictures: List[
                 {
                     '{description_key}': 'description',
                     '{description_content}': picture_dict['description']
+                }
+            )
+        else:
+            mapping_pictures[index].update(
+                {
+                    '{description_key}': str(),
+                    '{description_content}': str()
                 }
             )
 

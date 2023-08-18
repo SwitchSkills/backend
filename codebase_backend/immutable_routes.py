@@ -20,6 +20,7 @@ ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (list of dictionaries dictionary)
 datetime_utc
+type (open, accepted, completed)
 job (dictionary)
     title (str)
     job_description (str)
@@ -65,7 +66,11 @@ def activity_feed():
     }
     completed_jobs_in_region_dataframe = database_connection('completed_jobs_in_region', **mapping)
     active_jobs_in_region_dataframe = database_connection('jobs_in_region', **mapping)
-    return json.dumps(database_connection.sort_jobs(completed_jobs_in_region_dataframe,active_jobs_in_region_dataframe))
+    accepted_jobs_in_region = database_connection('accepted_jobs_in_region',**mapping)
+    database_connection.add_type(completed_jobs_in_region_dataframe, 'completed')
+    database_connection.add_type(active_jobs_in_region_dataframe,'open')
+    database_connection.add_type(accepted_jobs_in_region,'accepted')
+    return json.dumps(database_connection.sort_jobs(completed_jobs_in_region_dataframe,active_jobs_in_region_dataframe, accepted_jobs_in_region))
 
 
 """

@@ -7,6 +7,7 @@ WITH liked_jobs AS (
         user_like_jobs.user_id = {user_id}
 ),
     {completed_jobs},
+    {accepted_jobs},
 relevant_jobs AS (
 SELECT
     jobs.job_id,
@@ -21,6 +22,7 @@ FROM jobs
 JOIN liked_jobs ON
     liked_jobs.job_id = jobs.job_id
     AND jobs.job_id NOT IN completed_jobs.job_id
+    AND jobs.job_id NOT IN accepted_jobs.job_id
 ),
 {job_additional_information.sql}
 SELECT

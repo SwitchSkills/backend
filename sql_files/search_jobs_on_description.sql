@@ -8,6 +8,7 @@ WHERE
     region_id IN {region_id_list}
 ),
 {completed_jobs},
+{accepted_jobs},
 relevant_jobs AS (
 SELECT
     jobs.job_id,
@@ -22,6 +23,7 @@ FROM jobs
 JOIN relevant_regions ON
     jobs.region_id = region.region_id
     AND jobs.job_id NOT IN completed_jobs.job_id
+    AND jobs.job_id NOT IN accepted_jobs.job_id
     AND jobs.description LIKE '%{search}%'
 ),
 {job_additional_information}

@@ -6,7 +6,7 @@ from app import app, credentials_factory, database_connection
 from codebase_backend.helper_functions import verify_and_insert_user, get_change_user_name_mapping, insert_picture_user, \
     insert_regions_user, insert_labels_user, verify_and_insert_job, insert_pictures_job, insert_labels_job, \
     get_change_job_title_mapping
-from codebase_backend.semaphores import user_lock
+from codebase_backend.semaphores import user_lock, completed_job_lock, liked_job_lock
 
 # TODO: locks!!!!!
 """
@@ -186,8 +186,8 @@ def change_job_title():
 
 """
 path "/user_liked_job" will mark a job in the database as liked by a user. Expecting following dictionary in JSON format
-first_name_user (str)
-last_name_user (str)
+first_name (str)
+last_name (str)
 job_title (str)
 REQUIREMENTS:
 user exists
@@ -204,13 +204,21 @@ code 0
 
 @app.post('/user_liked_job')
 def user_liked_job():
-    pass
-
+    arguments = request.get_json()
+    user_id = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])
+    mapping = {
+        '{user_id}': user_id,
+        '{title}': arguments['title']
+    }
+    liked_job_lock.acquire()
+    database_connection.execute_query('insert_liked_job',**mapping)
+    liked_job_lock.release()
+    return json.dumps({'code': 0})
 
 """
 path "/user_liked_job" will mark a job in the database as liked by a user. Expecting following dictionary in JSON format
-first_name_user (str)
-last_name_user (str)
+first_name (str)
+last_name (str)
 job_title (str)
 REQUIREMENTS:
 user exists
@@ -227,7 +235,16 @@ code 0
 
 @app.post('/user_unliked_job')
 def user_unliked_job():
-    pass
+    arguments = request.get_json()
+    user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
+    mapping = {
+        '{user_id}': user_id,
+        '{title}': arguments['title']
+    }
+    liked_job_lock.acquire()
+    database_connection.execute_query('delete_liked_job', **mapping)
+    liked_job_lock.release()
+    return json.dumps({'code': 0})
 
 
 """
@@ -251,7 +268,27 @@ code 0
 
 @app.post('/user_accepted_job')
 def user_accepted_job():
-    pass
+    arguments = request.get_json()
+    user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
+    mapping = {
+        '{user_id}': user_id,
+        '{title}': arguments['title'],
+        '{pending}': 'TRUE'
+    }
+    if arguments.get('datetime_request_utc'):
+        mapping.update({
+            '{datetime_request_utc_key}': 'datetime_request_utc',
+            '{datetime_request_utc_content}': arguments['datetime_request_utc']
+        })
+    else:
+        mapping.update({
+            '{datetime_request_utc_key}': str(),
+            '{datetime_request_utc_content}': str()
+        })
+    completed_job_lock.acquire()
+    database_connection.execute_query('insert_accepted_job', **mapping)
+    completed_job_lock.release()
+    return json.dumps({'code': 0})
 
 
 """
@@ -276,7 +313,26 @@ code 0
 
 @app.post('/user_completed_job')
 def user_completed_job():
-    pass
+    arguments = request.get_json()
+    user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
+    mapping = {
+        '{user_id}': user_id,
+        '{title}': arguments['title'],
+    }
+    if arguments.get('datetime_confirmation_utc'):
+        mapping.update({
+            '{datetime_confirmation_utc_key}': ', datetime_confirmation_utc = ',
+            '{datetime_confirmation_utc_content}': arguments['datetime_confirmation_utc']
+        })
+    else:
+        mapping.update({
+            '{datetime_confirmation_utc_key}': str(),
+            '{datetime_confirmation_utc_content}': str()
+        })
+    completed_job_lock.acquire()
+    database_connection.execute_query('insert_completed_job', **mapping)
+    completed_job_lock.release()
+    return json.dumps({'code': 0})
 
 
 """
@@ -300,7 +356,16 @@ code 0
 
 @app.post('/user_not_complete_job')
 def user_completed_job():
-    pass
+    arguments = request.get_json()
+    user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
+    mapping = {
+        '{user_id}': user_id,
+        '{title}': arguments['title'],
+    }
+    completed_job_lock.acquire()
+    database_connection.execute_query('delete_accepted_job', **mapping)
+    completed_job_lock.release()
+    return json.dumps({'code': 0})
 
 
 """
@@ -324,4 +389,16 @@ ASSUMPTION: rating comes from user that completed a job
 
 @app.post('/user_received_rating')
 def user_received_rating():
-    pass
+    arguments = request.get_json()
+    user_id = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])
+    mapping = {
+        '{user_id}': user_id
+    }
+    rating_information = database_connection.execute_query('get_rating_information_user',**mapping)
+    mapping.update({
+        '{rating}': (int(rating_information['number_of_ratings'])*float(rating_information['rating'])+int(arguments['rating']))/(int(rating_information['number_of_ratings'])+1),
+        '{number_of_ratings}': int(rating_information['number_of_ratings'])+1
+    })
+    user_lock.acquire()
+    database_connection.execute_query('update_rating_user',**mapping)
+    user_lock.release()

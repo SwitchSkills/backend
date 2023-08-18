@@ -17,7 +17,8 @@ class DatabaseConnector(metaclass=SingletonMeta):
         self._sub_query_mapping: Dict[str,str] = {
             '{completed_jobs}': read_sql_file('completed_jobs', True),
             '{job_additional_information}': read_sql_file('job_additional_information', True),
-            '{user_additional_information}': read_sql_file('user_additional_information',True)
+            '{user_additional_information}': read_sql_file('user_additional_information',True),
+            '{accepted_jobs}': read_sql_file('accepted_jobs', True)
         }
 
     @staticmethod
@@ -51,8 +52,12 @@ class DatabaseConnector(metaclass=SingletonMeta):
         except AssertionError:
             raise QueryConstructionError(plain_text_query)
         return plain_text_query
-    @staticmethod
-    def sort_jobs(list_1, list_2) -> list[Dict[str,Any]]:
+
+    def sort_jobs(self,list_1, list_2, list_3) -> list[Dict[str,Any]]:
+        tmp = self._sort_jobs_2(list_1,list_2)
+        return self._sort_jobs_2(tmp, list_3)
+
+    def _sort_jobs_2(self, list_1, list_2) -> list[Dict[str,Any]]:
         index_1 = 0
         index_2 = 0
         len_list_1 = len(list_1)
@@ -67,10 +72,10 @@ class DatabaseConnector(metaclass=SingletonMeta):
                 return tmp
             if list_1[index_1].get('datetime_utc') > list_2[index_2].get('datetime_utc'):
                 tmp.append(list_1[index_1])
-                index_1+=1
+                index_1 += 1
             else:
                 tmp.append(list_2[index_2])
-                index_2+=1
+                index_2 += 1
     @staticmethod
     def overlap(list_to_check,list_with_values) -> int:
         count = 0
@@ -118,3 +123,9 @@ class DatabaseConnector(metaclass=SingletonMeta):
         (recommendations[secondary_index], recommendations[high_index]) = (
         recommendations[high_index], recommendations[secondary_index])
         return secondary_index
+
+    def add_type(self,list_with_dict:List[Dict[str,Any]], type:str) -> None:
+        for element in list_with_dict:
+            element.update({
+                'type': type
+            })

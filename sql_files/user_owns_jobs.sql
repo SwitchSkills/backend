@@ -1,4 +1,7 @@
-WITH relevant_jobs AS (
+WITH
+{completed_jobs},
+{accepted_jobs},
+relevant_jobs AS (
     SELECT
         jobs.job_id,
         jobs.description AS job_description,
@@ -12,8 +15,9 @@ WITH relevant_jobs AS (
     WHERE
         jobs.user_id_owner = {user_id}
         AND jobs.job_id NOT IN completed_jobs.job_id
+        AND jobs.job_id NOT IN accepted_jobs.job_id
 ),
-{job_additional_information.sql}
+{job_additional_information}
 SELECT
     relevant_jobs.datetime_made_utc AS datetime_utc,
     relevant_jobs.title,

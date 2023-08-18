@@ -18,6 +18,7 @@ WHERE
     user._is_active_in_region.user_id = interested_user_id
 ),
 {completed_jobs},
+{accepted_jobs},
 select_job_ids_by_label AS (
 SELECT DISTINCT
             job_needs_labeled_skills.job_id
@@ -39,6 +40,7 @@ FROM jobs
 JOIN relevant_regions ON
     jobs.region_id = region.region_id
     AND jobs.job_id NOT IN completed_jobs.job_id
+    AND jobs.job_id NOT IN accepted_jobs.job_id
     AND jobs.job_id IN select_job_ids_by_label
 ),
 {job_additional_information}
