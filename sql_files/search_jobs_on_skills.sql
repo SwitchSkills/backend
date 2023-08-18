@@ -5,8 +5,7 @@ SELECT
     country
 FROM region
 WHERE
-    country = {country}
-    AND region_name IN {region_name_list}
+    region_id IN {region_id_list}
 ),
 
 {completed_jobs},
@@ -51,7 +50,7 @@ JOIN relevant_labels ON
 JOIN owners ON
     relevant_jobs.job_id = owners.job_id
 WHERE
-    labels.label_name IN {search_label_name_list}
+    labels.label_name LIKE '%{search}%'
 ORDER BY
     relevant_jobs.datetime_made_utc
 ;

@@ -93,11 +93,6 @@ VALUES(
        '77a0a019-5488-5d10-8b96-dee54a414961'
       );
 
-UPDATE users
-SET picture_id = '17b9cfc4-2c1d-4b75-a98d-b4e041abf0d4'
-WHERE user_id = '77a0a019-5488-5d10-8b96-dee54a414961';
-
-
 INSERT INTO region(region_id,region_name,country)
 VALUES(
         '42f61a13-ef12-57a2-92af-ae659dd39e83',

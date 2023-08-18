@@ -1,12 +1,4 @@
-WITH interested_user_id AS (
-    SELECT
-    users.user_id
-FROM users
-WHERE
-    users.first_name = {first_name}
-    AND users.last_name = {last_name}
-),
-relevant_jobs AS (
+WITH relevant_jobs AS (
     SELECT
         jobs.job_id,
         jobs.description AS job_description,
@@ -18,7 +10,7 @@ relevant_jobs AS (
         jobs.location AS job_location
     FROM jobs
     WHERE
-        jobs.user_id_owner = interested_user_id
+        jobs.user_id_owner = {user_id}
         AND jobs.job_id NOT IN completed_jobs.job_id
 ),
 {job_additional_information.sql}

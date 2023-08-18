@@ -13,7 +13,7 @@ that contains parameters and settings for the email client and server.
 
 class ConfigWrapper(metaclass=SingletonMeta):
     def __init__(self,file_name: str):
-        with open(f"{file_name}.yaml", "r") as config:
+        with open(f"config/{file_name}.yaml", "r") as config:
             try:
                 # Converts yaml document to python object
                 self._loaded_config_dictionary = yaml.load(config, Loader=SafeLoader)

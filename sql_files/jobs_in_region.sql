@@ -5,8 +5,7 @@ SELECT
     country
 FROM region
 WHERE
-    country = {country}
-    AND region_name IN {region_name_list}
+    region_id IN {region_id_list}
 ),
 {completed_jobs},
 relevant_jobs AS (

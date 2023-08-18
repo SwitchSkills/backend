@@ -1,5 +1,14 @@
-from app import app
-#TODO: locks!!!!!
+import json
+
+from flask import request
+
+from app import app, credentials_factory, database_connection
+from codebase_backend.helper_functions import verify_and_insert_user, get_change_user_name_mapping, insert_picture_user, \
+    insert_regions_user, insert_labels_user, verify_and_insert_job, insert_pictures_job, insert_labels_job, \
+    get_change_job_title_mapping
+from codebase_backend.semaphores import user_lock
+
+# TODO: locks!!!!!
 """
 path "/user" will add a user to the database OR update existing user using (first_name, last_name) key, 
 to change this key use path "change_user_name". Expecting following dictionary in JSON:
@@ -19,13 +28,14 @@ labels (list of dictionaries)
 regions (list of dictionaries)
     region_name (str)
     country (str)
+rating [OPTIONAL]
+number_of_ratings [OPTIONAL]
 REQUIREMENTS:
 combination first name & last name UNIQUE
 email_address UNIQUE
 phone_number UNIQUE
 label exists
 region exists
-job exists
 ON BREAK: (dictionary)
 code 400 (client error)
 message (str)
@@ -34,11 +44,22 @@ code 500 (server error)
 ON SUCCESS (dictionary)
 code 0
 """
+
+
 @app.post('/user')
 def user():
-    #on existing user, drop to trigger cascade for labels and regions and re-insert
-    # can always delete, even if not exist -> idempotent operation
-    return 'Hello World!'
+    arguments = request.get_json()
+    if error_message := verify_and_insert_user(credentials_factory, database_connection, arguments):
+        return error_message
+
+    if arguments.get('picture'):
+        insert_picture_user(credentials_factory, database_connection, arguments)
+
+    insert_labels_user(credentials_factory, database_connection, arguments)
+    insert_regions_user(credentials_factory, database_connection, arguments)
+
+    return json.dumps({'code': 0})
+
 
 """
 path "/change_user_name" will change the (first_name, last_name) key of an existing user. Expecting following dictionary in JSON:
@@ -57,10 +78,26 @@ code 500 (server error)
 ON SUCCESS (dictionary)
 code 0
 """
+
+
 @app.post("change_user_name")
 def change_user_name():
-    #user update query
-    pass
+    arguments = request.get_json()
+
+    try:
+        mapping = get_change_user_name_mapping(credentials_factory, arguments)
+    except KeyError as e:
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"following key error: {e}"
+            }
+        )
+    user_lock.acquire()
+    database_connection.execute_query('update_user_name', **mapping)
+    user_lock.release()
+    return json.dumps({'code': 0})
+
 
 """
 path "/job" will add a job to the database OR update an existing job using the key (title), to change the title 
@@ -77,6 +114,9 @@ first_name_owner
 last_name_owner
 labels (list of dictionaries)
     label_name (str)
+picture [OPTIONAL] (list of dictionary)
+    picture_location_firebase (str: download url)
+    description [OPTIONAL] (str)
 REQUIREMENTS:
 title UNIQUE
 user exists
@@ -90,11 +130,23 @@ code 500 (server error)
 ON SUCCESS(dictionary)
 code 0
 """
+
+
 @app.post('/job')
 def job():
-    # on existing job, drop to trigger cascade for labels and regions and re-insert
-    # can always delete, even if not exist -> idempotent operation
-    pass
+    arguments = request.get_json()
+    arguments.update({
+        'regions': [arguments['region']]  # recycle check code from user regions
+    })
+    if error_message := verify_and_insert_job(credentials_factory, database_connection, arguments):
+        return error_message
+
+    if arguments.get('picture'):
+        insert_pictures_job(credentials_factory, database_connection, arguments)
+
+    insert_labels_job(credentials_factory, database_connection, arguments)
+    return json.dumps({'code': 0})
+
 
 """
 path "/change_job_title" will change the title key of an existing job. Expecting following dictionary in JSON:
@@ -111,10 +163,26 @@ code 500 (server error)
 ON SUCCESS (dictionary)
 code 0
 """
+
+
 @app.post('/change_job_title')
 def change_job_title():
-    #user update query
-    pass
+    arguments = request.get_json()
+
+    try:
+        mapping = get_change_job_title_mapping(credentials_factory, arguments)
+    except KeyError as e:
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"following key error: {e}"
+            }
+        )
+    user_lock.acquire()
+    database_connection.execute_query('update_job_title', **mapping)
+    user_lock.release()
+    return json.dumps({'code': 0})
+
 
 """
 path "/user_liked_job" will mark a job in the database as liked by a user. Expecting following dictionary in JSON format
@@ -132,6 +200,8 @@ code 500 (server error)
 ON SUCCESS (dictionary)
 code 0
 """
+
+
 @app.post('/user_liked_job')
 def user_liked_job():
     pass
@@ -153,6 +223,8 @@ code 500 (server error)
 ON SUCCESS (dictionary)
 code 0
 """
+
+
 @app.post('/user_unliked_job')
 def user_unliked_job():
     pass
@@ -175,9 +247,12 @@ code 500 (server error)
 ON SUCCESS (dictionary)
 code 0
 """
+
+
 @app.post('/user_accepted_job')
 def user_accepted_job():
     pass
+
 
 """
 path "/user_completed_job" will mark a job in the database as completed by a user. Expecting following dictionary in JSON format
@@ -197,9 +272,12 @@ code 500 (server error)
 ON SUCCESS OR NO CHANGE(dictionary)
 code 0
 """
+
+
 @app.post('/user_completed_job')
 def user_completed_job():
     pass
+
 
 """
 path "/user_completed_job" will mark a job in the database as completed by a user. Expecting following dictionary in JSON format
@@ -218,9 +296,12 @@ code 500 (server error)
 ON SUCCESS (dictionary)
 code 0
 """
+
+
 @app.post('/user_not_complete_job')
 def user_completed_job():
     pass
+
 
 """
 path "/user_receive_rating" will update the rating of a existing user. Expecting following dictionary in JSON format
@@ -239,6 +320,8 @@ ON SUCCESS (dictionary)
 code 0
 ASSUMPTION: rating comes from user that completed a job 
 """
+
+
 @app.post('/user_received_rating')
 def user_received_rating():
     pass

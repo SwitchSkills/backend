@@ -5,8 +5,7 @@ SELECT
     country
 FROM region
 WHERE
-    country = {country}
-    AND region_name IN {region_name_list}
+    region_id IN {region_id_list}
 ),
 
 {completed_jobs},
@@ -24,7 +23,6 @@ FROM jobs
 JOIN relevant_regions ON
     jobs.region_id = region.region_id
     AND jobs.job_id NOT IN completed_jobs.job_id
-    AND jobs.user_id_owner = {search_user_id_owner}
 ),
 {job_additional_information}
 SELECT
@@ -51,6 +49,9 @@ JOIN relevant_labels ON
     relevant_jobs.job_id = relevant_labels.job_id
 JOIN owners ON
     relevant_jobs.job_id = owners.job_id
+WHERE
+    users.first_name LIKE'%{search_first_name}%'
+    AND users.last_name LIKE '%{search_last_name}%'
 ORDER BY
     relevant_jobs.datetime_made_utc
 ;

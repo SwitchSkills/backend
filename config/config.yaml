@@ -5,10 +5,3 @@ database_user:
     user_name: SQL_user
     password: .:@u$8SeAL^"UHV+
     database_name: SwitchSkills
-
-
-INSTANCE_CONNECTION_NAME = f"{project_id}:{region}:{instance_name}" # i.e demo-project:us-central1:demo-instance
-print(f"Your instance connection name is: {INSTANCE_CONNECTION_NAME}")
-DB_USER = "chef"
-DB_PASS = "food"
-DB_NAME = "sandwiches"

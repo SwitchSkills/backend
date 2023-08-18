@@ -1,17 +1,10 @@
-WITH interested_user_id AS (
-    SELECT
-    users.user_id
-FROM users
-WHERE
-    users.first_name = {first_name}
-    AND users.last_name = {last_name}
-),
+WITH
 relevant_label_names AS (
     SELECT
         label_name
     FROM user_has_labeled_skills
     WHERE
-        user_has_labeled_skills.user_id = interested_user_id
+        user_has_labeled_skills.user_id = {user_id}
 ),
 relevant_regions AS (
 SELECT
@@ -25,6 +18,13 @@ WHERE
     user._is_active_in_region.user_id = interested_user_id
 ),
 {completed_jobs},
+select_job_ids_by_label AS (
+SELECT DISTINCT
+            job_needs_labeled_skills.job_id
+        FROM job_needs_labeled_skills
+        WHERE
+            job_needs_labeled_skills.label_name IN relevant_label_names
+    ),
 relevant_jobs AS (
 SELECT
     jobs.job_id,
@@ -39,6 +39,7 @@ FROM jobs
 JOIN relevant_regions ON
     jobs.region_id = region.region_id
     AND jobs.job_id NOT IN completed_jobs.job_id
+    AND jobs.job_id IN select_job_ids_by_label
 ),
 {job_additional_information}
 SELECT
@@ -65,6 +66,4 @@ JOIN relevant_labels ON
     relevant_jobs.job_id = relevant_labels.job_id
 JOIN owners ON
     relevant_jobs.job_id = owners.job_id
-WHERE
-    lables.label_name IN relevant_label_names.label_name
 ;

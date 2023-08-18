@@ -5,8 +5,7 @@ SELECT
     country
 FROM region
 WHERE
-    country = {country}
-    AND region_name IN {region_name_list}
+    region_id IN {region_id_list}
 ),
 
 {completed_jobs},
@@ -24,7 +23,7 @@ FROM jobs
 JOIN relevant_regions ON
     jobs.region_id = region.region_id
     AND jobs.job_id NOT IN completed_jobs.job_id
-    AND jobs.title = {search_title}
+    AND jobs.title LIKE '%{search}%'
 ),
 {job_additional_information}
 SELECT

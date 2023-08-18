@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS users(
     phone_number VARCHAR(15) NOT NULL UNIQUE KEY,
     alternative_communication VARCHAR(200) NULL DEFAULT NULL,
     bibliography LONGTEXT DEFAULT NULL,
-    picture_id VARCHAR(200) DEFAULT NULL REFERENCES picture(picture_id) ON DELETE SET NULL ON UPDATE CASCADE ,
     password VARCHAR(200) NOT NULL,
     location VARCHAR(200) NOT NULL,
     rating INTEGER DEFAULT 0,
@@ -69,7 +68,8 @@ CREATE TABLE IF NOT EXISTS user_has_labeled_skills(
   user_id VARCHAR(200) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
   label_name VARCHAR(50) REFERENCES labels(label_name) ON DELETE RESTRICT ON UPDATE CASCADE,
   INDEX(user_id),
-  INDEX(label_name)
+  INDEX(label_name),
+  UNIQUE(user_id, label_name)
 );
 
 CREATE TABLE IF NOT EXISTS job_needs_labeled_skills(

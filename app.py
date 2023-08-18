@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from structlog import get_logger
 
+from codebase_backend.CredentialsFactory import CredentialsFactory
 from codebase_backend.DatabaseConnector import DatabaseConnector
 from config.ConfigWrapper import ConfigWrapper
 
@@ -19,5 +20,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 db = SQLAlchemy()
 db.init_app(app)
 database_connection = DatabaseConnector(config,db)
+credentials_factory = CredentialsFactory()
 if __name__ == '__main__':
     app.run()

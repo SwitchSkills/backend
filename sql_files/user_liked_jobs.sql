@@ -1,18 +1,10 @@
 
-WITH interested_user_id AS (
-    SELECT
-    users.user_id
-FROM users
-WHERE
-    users.first_name = {first_name}
-    AND users.last_name = {last_name}
-),
-liked_jobs AS (
+WITH liked_jobs AS (
     SELECT
         job_id
     FROM users_like_jobs
     WHERE
-        user_like_jobs.user_id = interested_user_id.user_id
+        user_like_jobs.user_id = {user_id}
 ),
     {completed_jobs},
 relevant_jobs AS (

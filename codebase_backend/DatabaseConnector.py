@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, Any
 
 import pandas as pd
 from google.cloud.sql.connector import Connector, IPTypes
@@ -17,10 +17,7 @@ class DatabaseConnector(metaclass=SingletonMeta):
         self._sub_query_mapping: Dict[str,str] = {
             '{completed_jobs}': read_sql_file('completed_jobs', True),
             '{job_additional_information}': read_sql_file('job_additional_information', True),
-            '{user_additional_information}': read_sql_file('user_additional_information',True),
-            '{user_search_first_name}': read_sql_file('user_search_first_name}',True),
-            '{user_search_full_name}': read_sql_file('user_search_full_name', True),
-            '{user_search_last_name': read_sql_file('user_search_last_name', True)
+            '{user_additional_information}': read_sql_file('user_additional_information',True)
         }
 
     @staticmethod
@@ -36,7 +33,7 @@ class DatabaseConnector(metaclass=SingletonMeta):
             ip_type=IPTypes.PUBLIC  # IPTypes.PRIVATE for private IP
         )
 
-    def execute_query(self,filename:str,**kwargs) -> pd.DataFrame:
+    def execute_query(self,filename:str,**kwargs) -> List[Dict[str,Any]]:
 
         result = self._db_conn.engine.execute(self._get_query(filename, **kwargs))
         print(result)
@@ -54,3 +51,70 @@ class DatabaseConnector(metaclass=SingletonMeta):
         except AssertionError:
             raise QueryConstructionError(plain_text_query)
         return plain_text_query
+    @staticmethod
+    def sort_jobs(list_1, list_2) -> list[Dict[str,Any]]:
+        index_1 = 0
+        index_2 = 0
+        len_list_1 = len(list_1)
+        len_list_2 = len(list_2)
+        tmp = list()
+        while True:
+            if index_1 == len_list_1:
+                tmp.append(list_2[index_2:])
+                return tmp
+            elif index_2 == len_list_2:
+                tmp.append(list_1[index_1:])
+                return tmp
+            if list_1[index_1].get('datetime_utc') > list_2[index_2].get('datetime_utc'):
+                tmp.append(list_1[index_1])
+                index_1+=1
+            else:
+                tmp.append(list_2[index_2])
+                index_2+=1
+    @staticmethod
+    def overlap(list_to_check,list_with_values) -> int:
+        count = 0
+        for value in list_with_values:
+            if value in list_to_check:
+                count+=1
+        try:
+            assert(count != 0)
+        except AssertionError:
+            QueryConstructionError("There is a bug in the recommended_jobs query\n"
+                                   f"list_to_check (of job):{list_to_check}\n"
+                                   f"list_with_values (of user): {list_with_values}"
+            )
+        return round(float(count)*100/len(list_with_values))
+
+    """
+    Quicksort
+    """
+    def sort_recommendations(self,recommendations, low_index = None, high_index = None) -> None:
+        if high_index is None:
+            high_index = len(recommendations) - 1
+        if low_index is None:
+            low_index = 0
+        if low_index < high_index:
+            spil_position = self._reposition_spil(recommendations, low_index, high_index)
+
+            # recursive call on the left of pivot
+            self.sort_recommendations(recommendations, low_index, spil_position - 1)
+
+            # recursive call on the right of pivot
+            self.sort_recommendations(recommendations, spil_position + 1, high_index)
+        # function to find the partition position
+    @staticmethod
+    def _reposition_spil(recommendations, low_index, high_index) -> int:
+
+        pivot = recommendations[high_index]
+        secondary_index = low_index
+
+        for index_loop in range(low_index, high_index):
+            if recommendations[index_loop]['matching_score'] >= pivot['matching_score']:
+                (recommendations[secondary_index], recommendations[index_loop]) = (
+                    recommendations[index_loop], recommendations[secondary_index])
+                secondary_index = secondary_index + 1
+
+        (recommendations[secondary_index], recommendations[high_index]) = (
+        recommendations[high_index], recommendations[secondary_index])
+        return secondary_index

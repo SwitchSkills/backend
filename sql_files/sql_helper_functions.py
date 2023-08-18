@@ -10,3 +10,7 @@ def read_sql_file(filename:str,sub_query: bool = False) -> str:
         with open('sql_files/'
                   f'{filename}.sql','r') as file:
             return file.read()
+
+
+def get_sql_list(original_list: list) -> str:
+    return '( ' + ','.join(original_list) + ')'
