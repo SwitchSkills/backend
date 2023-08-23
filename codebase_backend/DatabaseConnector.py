@@ -38,7 +38,7 @@ class DatabaseConnector(metaclass=SingletonMeta):
 
         result = self._db_conn.engine.execute(self._get_query(filename, **kwargs))
         print(result)
-        return pd.DataFrame()
+        return list(dict())
     def _get_query(self,filename, **kwargs) -> str:
         raw_sql = read_sql_file(filename)
         template_sql = str()

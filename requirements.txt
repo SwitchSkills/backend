@@ -1,6 +1,6 @@
-Pillow
+gunicorn
 flask
+requests
 pandas
 cloud-sql-python-connector
-pymysql
 Flask-SQLAlchemy

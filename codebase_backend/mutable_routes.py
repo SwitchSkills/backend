@@ -1,14 +1,15 @@
 import json
 
-from flask import request
+from flask import request, g
 
-from app import app, credentials_factory, database_connection
+from app import app, credentials_factory, database_connection, logger
+from codebase_backend.decorators import catch_sever_crash
 from codebase_backend.helper_functions import verify_and_insert_user, get_change_user_name_mapping, insert_picture_user, \
     insert_regions_user, insert_labels_user, verify_and_insert_job, insert_pictures_job, insert_labels_job, \
     get_change_job_title_mapping
 from codebase_backend.semaphores import user_lock, completed_job_lock, liked_job_lock
 
-# TODO: locks!!!!!
+
 """
 path "/user" will add a user to the database OR update existing user using (first_name, last_name) key, 
 to change this key use path "change_user_name". Expecting following dictionary in JSON:
@@ -47,6 +48,7 @@ code 0
 
 
 @app.post('/user')
+@catch_sever_crash
 def user():
     arguments = request.get_json()
     if error_message := verify_and_insert_user(credentials_factory, database_connection, arguments):
@@ -81,12 +83,14 @@ code 0
 
 
 @app.post("change_user_name")
+@catch_sever_crash
 def change_user_name():
     arguments = request.get_json()
 
     try:
         mapping = get_change_user_name_mapping(credentials_factory, arguments)
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -133,6 +137,7 @@ code 0
 
 
 @app.post('/job')
+@catch_sever_crash
 def job():
     arguments = request.get_json()
     arguments.update({
@@ -166,12 +171,14 @@ code 0
 
 
 @app.post('/change_job_title')
+@catch_sever_crash
 def change_job_title():
     arguments = request.get_json()
 
     try:
         mapping = get_change_job_title_mapping(credentials_factory, arguments)
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -203,6 +210,7 @@ code 0
 
 
 @app.post('/user_liked_job')
+@catch_sever_crash
 def user_liked_job():
     arguments = request.get_json()
     user_id = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])
@@ -234,6 +242,7 @@ code 0
 
 
 @app.post('/user_unliked_job')
+@catch_sever_crash
 def user_unliked_job():
     arguments = request.get_json()
     user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
@@ -267,6 +276,7 @@ code 0
 
 
 @app.post('/user_accepted_job')
+@catch_sever_crash
 def user_accepted_job():
     arguments = request.get_json()
     user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
@@ -312,6 +322,7 @@ code 0
 
 
 @app.post('/user_completed_job')
+@catch_sever_crash
 def user_completed_job():
     arguments = request.get_json()
     user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
@@ -355,6 +366,7 @@ code 0
 
 
 @app.post('/user_not_complete_job')
+@catch_sever_crash
 def user_completed_job():
     arguments = request.get_json()
     user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
@@ -388,6 +400,7 @@ ASSUMPTION: rating comes from user that completed a job
 
 
 @app.post('/user_received_rating')
+@catch_sever_crash
 def user_received_rating():
     arguments = request.get_json()
     user_id = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])

@@ -1,6 +1,8 @@
 import json
 from typing import Dict, Any, Union, List, cast
 
+from flask import g
+
 from codebase_backend.CredentialsFactory import CredentialsFactory
 from codebase_backend.DatabaseConnector import DatabaseConnector
 from codebase_backend.semaphores import user_lock, picture_lock, region_lock, job_lock, label_user_lock, \
@@ -12,7 +14,9 @@ def verify_labels(database_connection:DatabaseConnector, arguments: Dict[str,Uni
     mapping_verifying_labels = {
         '{label_name_list}': get_sql_list([label['label_name'] for label in arguments['labels']])
     }
+
     verified_labels = database_connection.execute_query('verify_label', **mapping_verifying_labels)
+
     if len(verified_labels) != len(arguments['labels']):
         return verified_labels
     else:

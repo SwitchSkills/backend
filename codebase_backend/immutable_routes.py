@@ -1,8 +1,9 @@
-from flask import request
+from flask import request, g
 import json
-from app import app
+from app import app, logger
 from app import database_connection
 from app import credentials_factory
+from codebase_backend.decorators import catch_sever_crash
 from sql_files.sql_helper_functions import get_sql_list
 
 """
@@ -50,11 +51,13 @@ helper (only for completed)
     user_location
 """
 @app.get('/activity_feed')
+@catch_sever_crash
 def activity_feed():
     arguments = request.get_json()
     try:
         region_id_list = get_sql_list([credentials_factory.get_region_id(region['country'],region['region_name']) for region in arguments])
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -64,6 +67,7 @@ def activity_feed():
     mapping = {
         '{region_id_list}': region_id_list
     }
+
     completed_jobs_in_region_dataframe = database_connection('completed_jobs_in_region', **mapping)
     active_jobs_in_region_dataframe = database_connection('jobs_in_region', **mapping)
     accepted_jobs_in_region = database_connection('accepted_jobs_in_region',**mapping)
@@ -110,12 +114,15 @@ owner
     user_location
 """
 @app.get('/active_jobs_in_region')
+@catch_sever_crash
 def active_jobs_in_region():
+
     arguments = request.get_json()
     try:
         region_id_list = get_sql_list(
             [credentials_factory.get_region_id(region['country'], region['region_name']) for region in arguments])
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -163,11 +170,13 @@ owner
     user_location
 """
 @app.get('/completed_jobs_by_user')
+@catch_sever_crash
 def completed_jobs_by_user():
     arguments = request.get_json()
     try:
         user_id = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -216,11 +225,13 @@ owner
     user_location
 """
 @app.get('/accepted_jobs_by_user')
+@catch_sever_crash
 def accepted_jobs_by_user():
     arguments = request.get_json()
     try:
         user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -270,11 +281,13 @@ owner
     user_location
 """
 @app.get('/liked_jobs_by_user')
+@catch_sever_crash
 def liked_jobs_by_user():
     arguments = request.get_json()
     try:
         user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -323,11 +336,13 @@ owner (would send so you can keep reusing the feed you made + shows how others s
     user_location
 """
 @app.get('/jobs_owned_by_user')
+@catch_sever_crash
 def jobs_owned_by_user():
     arguments = request.get_json()
     try:
         user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -369,12 +384,14 @@ user
     user_location
 """
 @app.get('/all_users_in_region')
+@catch_sever_crash
 def all_users_in_region():
     arguments = request.get_json()
     try:
         region_id_list = get_sql_list(
             [credentials_factory.get_region_id(region['country'], region['region_name']) for region in arguments])
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -428,6 +445,7 @@ owner
     user_location
 """
 @app.get('/search_jobs')
+@catch_sever_crash
 def search_jobs():
 
     arguments = request.get_json()
@@ -448,6 +466,7 @@ def search_jobs():
                 '{search}': arguments['search']
             })
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -494,6 +513,7 @@ user
     user_location
 """
 @app.get('/search_users')
+@catch_sever_crash
 def search_users():
     #(full_name, bibliography, email_address, phone_number)
     arguments = request.get_json()
@@ -509,6 +529,7 @@ def search_users():
                 '{search}': arguments['search']
             }
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,
@@ -547,11 +568,13 @@ owner
     user_location
 """
 @app.get('/match_jobs')
+@catch_sever_crash
 def match_jobs():
     arguments = request.get_json()
     try:
         user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
     except KeyError as e:
+        logger.error(g.execution_id, "KEY ERROR", e)
         return json.dumps(
             {
                 'code': 400,

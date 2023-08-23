@@ -1,4 +1,6 @@
-from flask import Flask
+import os
+
+from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
 from structlog import get_logger
 
@@ -21,5 +23,8 @@ db = SQLAlchemy()
 db.init_app(app)
 database_connection = DatabaseConnector(config,db)
 credentials_factory = CredentialsFactory()
+
+g.reading_counter_variable = 0
+
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT",8080)))
