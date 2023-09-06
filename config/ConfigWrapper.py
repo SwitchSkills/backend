@@ -35,7 +35,7 @@ class ConfigWrapper(metaclass=SingletonMeta):
         return f"{self.get_project_id()}:{self.get_SQL_instance_region()}:{self.get_SQL_instance_name()}"
 
     def get_database_role_user_name(self) -> str:
-        return self._loaded_config_dictionary.get("database_user").get("use_name")
+        return self._loaded_config_dictionary.get("database_user").get("user_name")
 
     def get_database_role_password(self) -> str:
         return self._loaded_config_dictionary.get("database_user").get("password")

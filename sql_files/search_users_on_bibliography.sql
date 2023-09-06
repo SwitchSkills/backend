@@ -1,3 +1,3 @@
 {users_in_region}
 WHERE
-    users.bibliography LIKE '%{search_bibliography}%'
+    users.bibliography LIKE '%{search}%'

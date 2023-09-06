@@ -13,14 +13,14 @@ SELECT
     jobs.job_id,
     jobs.description AS job_description,
     jobs.title,
-    region.region_name,
-    region.country,
+    relevant_regions.region_name,
+    relevant_regions.country,
     jobs.user_id_owner,
     jobs.location AS job_location
 FROM jobs
 JOIN relevant_regions ON
-    jobs.region_id = region.region_id
-    AND jobs.job_id IN completed_jobs.job_id
+    jobs.region_id = relevant_regions.region_id
+    AND jobs.job_id IN (SELECT job_id FROM completed_jobs)
 ),
 relevant_users AS (
 SELECT
@@ -30,22 +30,23 @@ SELECT
 FROM relevant_regions
 JOIN user_is_active_in_region ON
     user_is_active_in_region.region_id = relevant_regions.region_id
-    AND users.user_id IN completed_jobs.user_id
+    AND user_is_active_in_region.user_id IN (SELECT user_id FROM completed_jobs)
     ),
 helper_information AS (
 SELECT
-    completed_jobs.job_id
+    completed_jobs.job_id,
     completed_jobs.datetime_confirmation_utc,
     users.first_name,
     users.last_name,
     users.email_address,
     users.phone_number,
     users.alternative_communication,
-    users.user_location
+    users.location AS user_location
 FROM users
-JOIN relevant_users
+JOIN relevant_users ON
+    users.user_id = relevant_users.user_id
 JOIN completed_jobs ON
-    completed_jobs.user_id = users.user_id
+    users.user_id = completed_jobs.user_id
     ),
 {job_additional_information}
 SELECT
@@ -55,10 +56,10 @@ SELECT
     relevant_jobs.job_location,
     relevant_jobs.region_name,
     relevant_jobs.country,
-    pictures.picture_location_firebase,
-    pictures.picture_description,
-    labels.label_name,
-    labels.label_description,
+    relevant_pictures.picture_location_firebase,
+    relevant_pictures.picture_description,
+    relevant_labels.label_name,
+    relevant_labels.label_description,
     owners.first_name AS owner_first_name,
     owners.last_name AS owner_last_name,
     owners.email_address AS owner_email_address,
@@ -70,7 +71,7 @@ SELECT
     helper_information.email_address AS helper_email_address,
     helper_information.alternative_communication AS helper_alternative_communication,
     helper_information.phone_number AS helper_phone_number,
-    helper_information.user_location AS helper_location,
+    helper_information.user_location AS helper_location
 FROM relevant_jobs
 LEFT JOIN relevant_pictures ON
     relevant_jobs.job_id = relevant_pictures.job_id
@@ -78,6 +79,8 @@ JOIN relevant_labels ON
     relevant_jobs.job_id = relevant_labels.job_id
 JOIN owners ON
     relevant_jobs.job_id = owners.job_id
+JOIN helper_information ON
+    helper_information.job_id = relevant_jobs.job_id
 ORDER BY
     helper_information.datetime_confirmation_utc
 ;

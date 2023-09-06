@@ -2,7 +2,8 @@ import json
 import time
 import uuid
 from flask import g, request
-from app import app, logger
+
+from codebase_backend import app, logger
 from config import version
 
 
@@ -25,4 +26,4 @@ def before_request_func():
     g.start_time = time.time()
     g.execution_id = execution_id
 
-    logger.info(g.execution_id, "ROUTE CALLED ", request.url)
+    logger.info(f"id: {g.execution_id}\n ROUTE CALLED {request.url}")

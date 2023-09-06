@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "ethereal-yen-394407",
+  "private_key_id": "7a1d3347e39c97854744e933656ce8a86e3e513b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCkme4o6AnKA9C6\n9/Mv3pCyks+8osJ3vAcuM4lDnYeF+T4uQbpNLQFWYwKy3bnFnZ3ySOVLgpbOOeGD\nsOhVxGxKIF+FMHyM0Ma+QRzzmJOCr3vpSt5cquMcdyRIotQ3zw1BYVp1VoUGWhz5\njQBmjfnKXaX7X9J7y7nwS8xX/p8FRiuGs1NBqgvu2QvbWirE8mcw7jtKsrAexR/j\nUNNMtJItbVG0QgD/VUomui9pcQSljQNVFpryn7yC3vAiLbeJnx5a+uxpuVCk4cJv\n0zVJnsfPDbqzLZ9zePgZ8uCaequtQfffTANpzII+d7LQizGKGmGroRakJ0ENjqiX\n+LQ/PRBPAgMBAAECggEAB29H0W4wVFZux6XVGgJAtpLTXO8HFKHCu0Sq/F8G/4yo\npoM5LII4uhOtIVzK0Xu95h3XyYeDqJtMWIaVlUYoKVhOqDVD8uz9L8ZreISZk8C5\nupRd+IE5fTrTweTPlsO8krRDLI30t+WQbc8qHPe9uB/Eaaxu1UD4TDvIO5NDJdmZ\nIe2e0MA/jdZGeWTAM1snjsq/q/45MVZrcPB7e2LCMi/3aDJ+dVvU4j7we7sOJgYT\npECxYJ/S2tQCwBVaUyZUPLHEjko3bXC62jPTO9j9LM9S0npFONWTDnphgnRz4/nk\n3PRyxk1XvDXHqHszk2WOzKvb4XA5rYihNdK0iUULYQKBgQDYmiYbzmFM7QT6gfPx\nhzSSA040gSWJZ7ijjddE6ej3MzFlmtBuHRgnA85TgXdXH1m3BslB8cJXFVJPedIM\nnYejpIRLlVJkymbnSUHOgWcrhFLah55pEwDiRwfWhVZcWqLmv3uQR9H0XQS5cUEJ\noXB1SDveaMyXRDtyHSaJpw7e4QKBgQDCimqWph2NDn+QDxtHdUooFwMx+nc9q65e\nnF4XNhP0YBS5ODmqEtSwkgWyey2Xdu5qYyxFiDDwcssIHD+6RcKFXMRh5Rkn0Jt9\n8ZjYLGMNGINbgphcuO21rj2sc5yiMVSE6/weFdFiwCcC65bjlHKsalCLymZmd4ez\nUe/XfN/FLwKBgGtk0qxKwXeQtT03naoNbYVP2kCyH9hm8uc09p0WlQmr+jv0bI+M\nIWOGwZApyvAJfUQAO11U7xSaX7tEHV9f49bBRU7sdHPA3xCiA9zN0EeFTkdHosVa\nRL/sk/hLGCymS8q4+hzpXzIXxLXlb2fFAatE61o0/+uoSwkjZu4tRHRBAoGATQuK\niR1CyNF8Ha6N7C/8bYInpsx+GvN6PEgLT4AASSEgM/abh8qrZz59eSElfj4A0Ct0\nphj44NFlrVGav4fPMQf7UpXr74PDgQ6ErOBvXgleRIilFNu8cN6P2FN1LhsBUR8w\nmy2i3kwhZxush3cML1Jvkd1Xzq76FD+YECyJZssCgYBh+raKBgRN7Lfihy37rtWX\npey1QjCshTapbuOTqqjxKBGtLoYYxKQ8ylaYEXTXfN9byGhJQFIsrfB4TMu8Qgk7\nv9lDApNnjS4l1DtSIwF7GaC2du+P18U1YdIemkuafcSGRp+xRRwvvXz/GrI+4XEz\nK705bNzuRplaPBZcupHqug==\n-----END PRIVATE KEY-----\n",
+  "client_email": "sql-service-account@ethereal-yen-394407.iam.gserviceaccount.com",
+  "client_id": "104443557566417831375",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sql-service-account%40ethereal-yen-394407.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

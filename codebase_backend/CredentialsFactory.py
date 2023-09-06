@@ -28,4 +28,4 @@ class CredentialsFactory(metaclass=SingletonMeta):
         return str(uuid.uuid5(self.__namespace_job, job_title+user_id_owner+region_id))
 
     def get_region_id(self,country, region_name):
-        return uuid.uuid5(self.__namespace_region, country+region_name)
+        return str(uuid.uuid5(self.__namespace_region, country+region_name))

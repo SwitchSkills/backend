@@ -1,8 +1,11 @@
+import os
 from typing import Dict, List, Any
 
-import pandas as pd
+from flask import g
 from google.cloud.sql.connector import Connector, IPTypes
+from sqlalchemy import text
 
+from codebase_backend import logger, DEBUG
 from codebase_backend.SingletonMeta import SingletonMeta
 from config.ConfigWrapper import ConfigWrapper
 from custom_exceptions.QueryConstructionError import QueryConstructionError
@@ -11,9 +14,9 @@ from sql_files.sql_helper_functions import read_sql_file
 
 class DatabaseConnector(metaclass=SingletonMeta):
 
-    def __init__(self,config:ConfigWrapper, database_connector):
+    def __init__(self,config:ConfigWrapper, database_engine):
         self._config = config
-        self._db_conn = database_connector
+        self._db_engine = database_engine
         self._sub_query_mapping: Dict[str,str] = {
             '{completed_jobs}': read_sql_file('completed_jobs', True),
             '{job_additional_information}': read_sql_file('job_additional_information', True),
@@ -30,27 +33,44 @@ class DatabaseConnector(metaclass=SingletonMeta):
             "pymysql",
             user=config.get_database_role_user_name(),
             password=config.get_database_role_password(),
-            db="my-database",
+            db=config.get_database_name(),
             ip_type=IPTypes.PUBLIC  # IPTypes.PRIVATE for private IP
         )
 
-    def execute_query(self,filename:str,**kwargs) -> List[Dict[str,Any]]:
+    def execute_query(self,filename:str,fetch_query = True, **kwargs) -> List[Dict[str,Any]]:
 
-        result = self._db_conn.engine.execute(self._get_query(filename, **kwargs))
-        print(result)
-        return list(dict())
+        with self._db_engine.connect() as conn:
+            if fetch_query:
+                result = conn.execute(text(self._get_query(filename, **kwargs))).mappings().all()
+                result = [dict(row_mapping) for row_mapping in result]
+
+                if DEBUG:
+                    logger.info(f"id:{g.execution_id}\n"
+                            f"{result}")
+                    logger.info(f"id:{g.execution_id}\n"
+                            f"{type(result)}:")
+                    logger.info("_____________________________________________________")
+                return result
+            else:
+                conn.execute(text(self._get_query(filename, **kwargs)))
+                conn.commit()
+
+
     def _get_query(self,filename, **kwargs) -> str:
-        raw_sql = read_sql_file(filename)
-        template_sql = str()
-        for key, value in self._sub_query_mapping:
-            template_sql = raw_sql.replace(key,value)
-        for key, value in kwargs:
-            plain_text_query = template_sql.replace(key,value)
+        plain_text_query = read_sql_file(filename)
+        for key, value in self._sub_query_mapping.items():
+            plain_text_query = plain_text_query.replace(key,value)
+        for key, value in kwargs.items():
+            plain_text_query = plain_text_query.replace(key,value)
         try:
             assert('{' not in plain_text_query)
             assert('}' not in plain_text_query)
         except AssertionError:
-            raise QueryConstructionError(plain_text_query)
+            raise QueryConstructionError(f"missed substitution in query:\n{plain_text_query}")
+        if DEBUG:
+            logger.info(f"id:{g.execution_id}\n"
+                        f"{filename}:")
+            logger.info(f"id:{g.execution_id}\n {plain_text_query}")
         return plain_text_query
 
     def sort_jobs(self,list_1, list_2, list_3) -> list[Dict[str,Any]]:
@@ -65,10 +85,10 @@ class DatabaseConnector(metaclass=SingletonMeta):
         tmp = list()
         while True:
             if index_1 == len_list_1:
-                tmp.append(list_2[index_2:])
+                tmp.extend(list_2[index_2:])
                 return tmp
             elif index_2 == len_list_2:
-                tmp.append(list_1[index_1:])
+                tmp.extend(list_1[index_1:])
                 return tmp
             if list_1[index_1].get('datetime_utc') > list_2[index_2].get('datetime_utc'):
                 tmp.append(list_1[index_1])
@@ -125,7 +145,64 @@ class DatabaseConnector(metaclass=SingletonMeta):
         return secondary_index
 
     def add_type(self,list_with_dict:List[Dict[str,Any]], type:str) -> None:
-        for element in list_with_dict:
-            element.update({
-                'type': type
-            })
+        if list_with_dict:
+            for element in list_with_dict:
+                element.update({
+                    'type': type
+                })
+
+    def group_attributes_jobs(self,jobs) -> List[Dict[str,str]]:
+        job_ids = list()
+        tmp = list()
+        for job in jobs:
+            if id := job['job_id'] != job_ids:
+                job_ids.append(id)
+                tmp_job = job.copy()
+                tmp_job['pictures'] = [{
+                    'picture_location_firebase': job['picture_location_firebase'],
+                    'picture_description': job['picture_description']
+                }]
+                tmp_job['labels'] = [{
+                    'label_name': job['label_name'],
+                    'label_description': job['label_description']
+                }]
+                tmp.append(tmp_job)
+            else:
+                duplicate_job = tmp[job_ids.index(id)]
+                duplicate_job['pictures'].append({
+                    'picture_location_firebase': job['picture_location_firebase'],
+                    'picture_description': job['picture_description']
+                })
+                duplicate_job['labels'].append({
+                    'label_name': job['label_name'],
+                    'label_description': job['label_description']
+                })
+        return tmp
+
+    def group_attributes_user(self,users) -> List[Dict[str,str]]:
+        user_ids = list()
+        tmp = list()
+        for user in users:
+            if id := user['user_id'] != user_ids:
+                user_ids.append(id)
+                tmp_user = user.copy()
+                tmp_user['regions'] = [{
+                    'region_name': user['region_name'],
+                    'country': user['country']
+                }]
+                tmp_user['labels'] = [{
+                    'label_name': user['label_name'],
+                    'label_description': user['label_description']
+                }]
+                tmp.append(tmp_user)
+            else:
+                duplicate_user = tmp[user_ids.index(id)]
+                duplicate_user['regions'].append({
+                    'region_name': user['region_name'],
+                    'country': user['country']
+                })
+                duplicate_user['labels'].append({
+                    'label_name': user['label_name'],
+                    'label_description': user['label_description']
+                })
+        return tmp

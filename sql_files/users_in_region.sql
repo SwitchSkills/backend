@@ -16,7 +16,7 @@ FROM relevant_regions
 JOIN user_is_active_in_region ON
     user_is_active_in_region.region_id = relevant_regions.region_id
     ),
-{user_addtional_information},
+{user_additional_information}
 
 SELECT
     users.first_name,
@@ -25,17 +25,17 @@ SELECT
     users.phone_number,
     users.alternative_communication,
     users.bibliography,
-    users.user_location,
-    relevant_user_ids.country,
-    relevant_user_ids.region_name,
-    relevant_picture.picture_data,
-    relevant_picture.picture_description,
+    users.location,
+    relevant_users.country,
+    relevant_users.region_name,
+    relevant_pictures.picture_location_firebase,
+    relevant_pictures.picture_description,
     relevant_labels.label_name,
     relevant_labels.label_description
 FROM users
 JOIN relevant_users ON
-    users.user_id = relevant_users.job_id
-LEFT JOIN relevant_pictures_users ON
-    users.user_id = relevant_pictures_users.user_id
-JOIN relevant_labels ON
+    users.user_id = relevant_users.user_id
+LEFT JOIN relevant_pictures ON
+    users.user_id = relevant_pictures.user_id
+LEFT JOIN relevant_labels ON
     users.user_id = relevant_labels.user_id

@@ -1,6 +1,6 @@
 relevant_pictures AS (
 SELECT
-    relevant_jobs.job_id
+    relevant_jobs.job_id,
     picture.picture_location_firebase,
     picture.description AS picture_description
 FROM picture
@@ -10,14 +10,14 @@ JOIN relevant_jobs ON
 ,
 relevant_labels AS (
 SELECT
-    relevant_users.user_id,
+    relevant_jobs.job_id,
     labels.label_name,
     labels.description AS label_description
 FROM labels
-JOIN user_has_labeled_skills ON
-    user_has_labeled_skills.label_name = labels.label_name
-JOIN relevant_users ON
-    relevant_users.user_id = user_has_labeled_skilss.user_id
+JOIN job_needs_labeled_skills ON
+    job_needs_labeled_skills.label_name = labels.label_name
+JOIN relevant_jobs ON
+    relevant_jobs.job_id = job_needs_labeled_skills.job_id
     ),
 owners AS (
 SELECT

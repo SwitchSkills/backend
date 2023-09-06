@@ -5,8 +5,8 @@ completed_jobs AS (
         job_id
     FROM users_completed_jobs
     WHERE
-        user_completed_jobs.user_id = {user_id}
-        AND user_completed_jobs.pending IS {pending}
+        users_completed_jobs.user_id = {user_id}
+        AND users_completed_jobs.pending IS {pending}
 ),
 relevant_jobs AS (
 SELECT
@@ -21,8 +21,10 @@ SELECT
 FROM jobs
 JOIN completed_jobs ON
     completed_jobs.job_id = jobs.job_id
+JOIN region ON
+    jobs.region_id = region.region_id
 ),
-{job_additional_information.sql}
+{job_additional_information}
 SELECT
     relevant_jobs.datetime_made_utc AS datetime_utc,
     relevant_jobs.title,
@@ -30,10 +32,10 @@ SELECT
     relevant_jobs.job_location,
     relevant_jobs.region_name,
     relevant_jobs.country,
-    pictures.picture_location_firebase,
-    pictures.picture_description,
-    labels.label_name,
-    labels.label_description,
+    relevant_pictures.picture_location_firebase,
+    relevant_pictures.picture_description,
+    relevant_labels.label_name,
+    relevant_labels.label_description,
     owners.first_name,
     owners.last_name,
     owners.email_address,
@@ -43,7 +45,7 @@ SELECT
 FROM relevant_jobs
 LEFT JOIN relevant_pictures ON
     relevant_jobs.job_id = relevant_pictures.job_id
-JOIN relevant_labels ON
+LEFT JOIN relevant_labels ON
     relevant_jobs.job_id = relevant_labels.job_id
 JOIN owners ON
     relevant_jobs.job_id = owners.job_id

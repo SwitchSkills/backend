@@ -3,5 +3,5 @@ database_region: europe-west1
 database_instance_name: nationbuilder
 database_user:
     user_name: SQL_user
-    password: .:@u$8SeAL^"UHV+
+    password: SQL
     database_name: SwitchSkills

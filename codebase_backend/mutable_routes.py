@@ -2,7 +2,7 @@ import json
 
 from flask import request, g
 
-from app import app, credentials_factory, database_connection, logger
+from codebase_backend import app, credentials_factory, database_connection, logger
 from codebase_backend.decorators import catch_sever_crash
 from codebase_backend.helper_functions import verify_and_insert_user, get_change_user_name_mapping, insert_picture_user, \
     insert_regions_user, insert_labels_user, verify_and_insert_job, insert_pictures_job, insert_labels_job, \
@@ -24,7 +24,7 @@ picture [OPTIONAL] (dictionary)
     description [OPTIONAL] (str)
 password (str, would do dubbel hash (frontend & backend) if easy to implement in frontend)
 location (str)
-labels (list of dictionaries)
+labels [OPTIONAL] (list of dictionaries)
     label_name (str)
 regions (list of dictionaries)
     region_name (str)
@@ -43,7 +43,7 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (dictionary)
-code 0
+code 200
 """
 
 
@@ -60,7 +60,7 @@ def user():
     insert_labels_user(credentials_factory, database_connection, arguments)
     insert_regions_user(credentials_factory, database_connection, arguments)
 
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 
 """
@@ -78,11 +78,11 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (dictionary)
-code 0
+code 200
 """
 
 
-@app.post("change_user_name")
+@app.post("/change_user_name")
 @catch_sever_crash
 def change_user_name():
     arguments = request.get_json()
@@ -90,7 +90,7 @@ def change_user_name():
     try:
         mapping = get_change_user_name_mapping(credentials_factory, arguments)
     except KeyError as e:
-        logger.error(g.execution_id, "KEY ERROR", e)
+        logger.error(f"id: {g.execution_id}\n KEY ERROR: {e}")
         return json.dumps(
             {
                 'code': 400,
@@ -100,7 +100,7 @@ def change_user_name():
     user_lock.acquire()
     database_connection.execute_query('update_user_name', **mapping)
     user_lock.release()
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 
 """
@@ -132,7 +132,7 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS(dictionary)
-code 0
+code 200
 """
 
 
@@ -150,7 +150,7 @@ def job():
         insert_pictures_job(credentials_factory, database_connection, arguments)
 
     insert_labels_job(credentials_factory, database_connection, arguments)
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 
 """
@@ -166,7 +166,7 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (dictionary)
-code 0
+code 200
 """
 
 
@@ -178,7 +178,7 @@ def change_job_title():
     try:
         mapping = get_change_job_title_mapping(credentials_factory, arguments)
     except KeyError as e:
-        logger.error(g.execution_id, "KEY ERROR", e)
+        logger.error(f"id: {g.execution_id}\n KEY ERROR: {e}")
         return json.dumps(
             {
                 'code': 400,
@@ -188,7 +188,7 @@ def change_job_title():
     user_lock.acquire()
     database_connection.execute_query('update_job_title', **mapping)
     user_lock.release()
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 
 """
@@ -205,7 +205,7 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (dictionary)
-code 0
+code 200
 """
 
 
@@ -221,7 +221,7 @@ def user_liked_job():
     liked_job_lock.acquire()
     database_connection.execute_query('insert_liked_job',**mapping)
     liked_job_lock.release()
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 """
 path "/user_liked_job" will mark a job in the database as liked by a user. Expecting following dictionary in JSON format
@@ -237,7 +237,7 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (dictionary)
-code 0
+code 200
 """
 
 
@@ -253,7 +253,7 @@ def user_unliked_job():
     liked_job_lock.acquire()
     database_connection.execute_query('delete_liked_job', **mapping)
     liked_job_lock.release()
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 
 """
@@ -271,7 +271,7 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (dictionary)
-code 0
+code 200
 """
 
 
@@ -298,7 +298,7 @@ def user_accepted_job():
     completed_job_lock.acquire()
     database_connection.execute_query('insert_accepted_job', **mapping)
     completed_job_lock.release()
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 
 """
@@ -317,7 +317,7 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS OR NO CHANGE(dictionary)
-code 0
+code 200
 """
 
 
@@ -343,7 +343,7 @@ def user_completed_job():
     completed_job_lock.acquire()
     database_connection.execute_query('insert_completed_job', **mapping)
     completed_job_lock.release()
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 
 """
@@ -361,13 +361,13 @@ message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (dictionary)
-code 0
+code 200
 """
 
 
 @app.post('/user_not_complete_job')
 @catch_sever_crash
-def user_completed_job():
+def user_not_completed_job():
     arguments = request.get_json()
     user_id = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
     mapping = {
@@ -377,7 +377,7 @@ def user_completed_job():
     completed_job_lock.acquire()
     database_connection.execute_query('delete_accepted_job', **mapping)
     completed_job_lock.release()
-    return json.dumps({'code': 0})
+    return json.dumps({'code': 200})
 
 
 """
@@ -387,14 +387,14 @@ last_name
 rating
 REQUIREMENT:
 user exists
-rating is between 0 and 5
+rating is between 200 and 5
 ON BREAK: (dictionary)
 code 400 (client error)
 message (str)
 ON NOT SUCCESSFUL (dictionary)
 code 500 (server error)
 ON SUCCESS (dictionary)
-code 0
+code 200
 ASSUMPTION: rating comes from user that completed a job 
 """
 

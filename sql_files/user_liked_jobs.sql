@@ -4,7 +4,7 @@ WITH liked_jobs AS (
         job_id
     FROM users_like_jobs
     WHERE
-        user_like_jobs.user_id = {user_id}
+        users_like_jobs.user_id = {user_id}
 ),
     {completed_jobs},
     {accepted_jobs},
@@ -21,10 +21,13 @@ SELECT
 FROM jobs
 JOIN liked_jobs ON
     liked_jobs.job_id = jobs.job_id
-    AND jobs.job_id NOT IN completed_jobs.job_id
-    AND jobs.job_id NOT IN accepted_jobs.job_id
+JOIN region ON
+    jobs.region_id = region.region_id
+WHERE
+    jobs.job_id NOT IN (SELECT job_id FROM completed_jobs)
+    AND jobs.job_id NOT IN (SELECT job_id FROM accepted_jobs)
 ),
-{job_additional_information.sql}
+{job_additional_information}
 SELECT
     relevant_jobs.datetime_made_utc AS datetime_utc,
     relevant_jobs.title,
@@ -32,10 +35,10 @@ SELECT
     relevant_jobs.job_location,
     relevant_jobs.region_name,
     relevant_jobs.country,
-    pictures.picture_location_firebase,
-    pictures.picture_description,
-    labels.label_name,
-    labels.label_description,
+    relevant_pictures.picture_location_firebase,
+    relevant_pictures.picture_description,
+    relevant_labels.label_name,
+    relevant_labels.label_description,
     owners.first_name,
     owners.last_name,
     owners.email_address,
@@ -45,7 +48,7 @@ SELECT
 FROM relevant_jobs
 LEFT JOIN relevant_pictures ON
     relevant_jobs.job_id = relevant_pictures.job_id
-JOIN relevant_labels ON
+LEFT JOIN relevant_labels ON
     relevant_jobs.job_id = relevant_labels.job_id
 JOIN owners ON
     relevant_jobs.job_id = owners.job_id

@@ -15,16 +15,17 @@ SELECT
     jobs.job_id,
     jobs.description AS job_description,
     jobs.title,
-    region.region_name,
-    region.country,
+    relevant_regions.region_name,
+    relevant_regions.country,
     jobs.user_id_owner,
     jobs.datetime_made_utc,
     jobs.location AS job_location
 FROM jobs
 JOIN relevant_regions ON
-    jobs.region_id = region.region_id
-    AND jobs.job_id NOT IN completed_jobs.job_id
-    AND jobs.job_id NOT IN accepted_jobs.job_id
+    jobs.region_id = relevant_regions.region_id
+WHERE
+    jobs.job_id NOT IN (SELECT job_id FROM completed_jobs)
+    AND jobs.job_id NOT IN (SELECT job_id FROM accepted_jobs)
 ),
 {job_additional_information}
 SELECT
@@ -34,10 +35,10 @@ SELECT
     relevant_jobs.job_location,
     relevant_jobs.region_name,
     relevant_jobs.country,
-    pictures.picture_location_firebase,
-    pictures.picture_description,
-    labels.label_name,
-    labels.label_description,
+    relevant_pictures.picture_location_firebase,
+    relevant_pictures.picture_description,
+    relevant_labels.label_name,
+    relevant_labels.label_description,
     owners.first_name,
     owners.last_name,
     owners.email_address,
@@ -51,7 +52,8 @@ JOIN relevant_labels ON
     relevant_jobs.job_id = relevant_labels.job_id
 JOIN owners ON
     relevant_jobs.job_id = owners.job_id
-WHERE labels.label_description LIKE '%{search}%'
+WHERE
+    relevant_labels.label_description LIKE '%{search}%'
 ORDER BY
     relevant_jobs.datetime_made_utc
 ;
