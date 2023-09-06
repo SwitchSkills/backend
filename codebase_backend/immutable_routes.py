@@ -5,6 +5,10 @@ from codebase_backend import app, logger, credentials_factory, database_connecti
 from codebase_backend.decorators import catch_sever_crash
 from sql_files.sql_helper_functions import get_sql_list, read_sql_file
 
+@app.route('/')
+def home():
+  return 'Hello World'
+
 """
 path "/activity_feed" will return the content for the mainscreen: all open jobs and completed jobs 
 ordered by time (earliest will be index 0). Expecting following dictionary in JSON:
