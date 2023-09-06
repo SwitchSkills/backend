@@ -6,5 +6,4 @@ cloud-sql-python-connector
 Flask-SQLAlchemy
 structlog
 PyYAML
-pymysql
 pg8000
