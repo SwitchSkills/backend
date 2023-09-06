@@ -8,4 +8,4 @@ structlog
 PyYAML
 pg8000
 SQLAlchemy
-pymysql
+PyMySQL
