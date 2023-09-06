@@ -19,6 +19,7 @@ JOIN user_is_active_in_region ON
 {user_additional_information}
 
 SELECT
+    users.user_id,
     users.first_name,
     users.last_name,
     users.email_address,

@@ -51,6 +51,7 @@ JOIN accepted_jobs ON
     ),
 {job_additional_information}
 SELECT
+    relevant_jobs.job_id,
     helper_information.datetime_confirmation_utc AS datetime_utc,
     relevant_jobs.title,
     relevant_jobs.job_description,

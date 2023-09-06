@@ -27,6 +27,7 @@ JOIN relevant_regions ON
 ),
 {job_additional_information}
 SELECT
+    relevant_jobs.job_id,
     relevant_jobs.datetime_made_utc AS datetime_utc,
     relevant_jobs.title,
     relevant_jobs.job_description,
