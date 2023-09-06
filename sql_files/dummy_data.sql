@@ -144,7 +144,8 @@ VALUES(
 
 INSERT INTO labels(label_name,description)
 VALUES
-    ('bicycle repair', 'mechanical repair for non-electric bicycles');
+    ('bicycle repair', 'mechanical repair for non-electric bicycles'),
+    ('test','testing purposes');
 
 INSERT INTO jobs(
                  job_id,

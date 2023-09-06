@@ -3,7 +3,7 @@ from functools import wraps
 
 from flask import g
 
-from codebase_backend import logger
+from codebase_backend import logger, DEBUG
 
 
 def catch_sever_crash(func):
@@ -12,7 +12,8 @@ def catch_sever_crash(func):
         try:
             return func(*args, **kwargs)
         except Exception as e:
-            raise e
+            if DEBUG:
+                raise e
             logger.error(f"{g.execution_id} \n SERVER ERROR {e}")
             return json.dumps(
                 {

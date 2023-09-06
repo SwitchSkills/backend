@@ -162,41 +162,63 @@ def insert_picture_user(credentials_factory: CredentialsFactory, database_connec
         )
     update_picture_mapping_with_optional_information(mapping_picture,arguments)
     picture_lock.acquire()
-    database_connection.execute_query('delete_picture', False,**mapping_picture)
     database_connection.execute_query('insert_picture',False,**mapping_picture)
     picture_lock.release()
 
 def insert_labels_user(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
     user_id = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])
-    label_list = [
-        get_sql_list([f"'{user_id}'", f"'{label['label_name']}'"]) for label in arguments['labels']
-    ]
-    mapping = {
-        '{label_list}': get_sql_list(label_list)
-    }
-    label_user_lock.acquire()
-    database_connection.execute_query('insert_labels_user',False,**mapping)
-    label_user_lock.release()
+    if len(arguments["labels"])> 1:
+        label_list = [
+            get_sql_list([f"'{user_id}'", f"'{label['label_name']}'"]) for label in arguments['labels']
+        ]
+        mapping = {
+            '{label_list}': ",".join(label_list)
+        }
+        label_user_lock.acquire()
+        database_connection.execute_query('insert_labels_user',False,**mapping)
+        label_user_lock.release()
+    else:
+        label_name = arguments["labels"][0]['label_name']
+        mapping = {
+            "{user_id}": f"'{user_id}'",
+            "{label_name}": f"'{label_name}'"
+        }
+        label_user_lock.acquire()
+        database_connection.execute_query('insert_label_user', False, **mapping)
+        label_user_lock.release()
 
 
 def insert_regions_user(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
-    user_id = f"'{credentials_factory.get_user_id(arguments['first_name'], arguments['second_name'])}'"
-    region_list = [
-        get_sql_list([f"'{user_id}'", f"'{credentials_factory.get_region_id(region['country'], region['region_name'])}'"]) for region in arguments['regions']
-    ]
-    mapping = {
-        '{region_list}': get_sql_list(region_list)
-    }
-    region_lock.acquire()
-    database_connection.execute_query('insert_regions_user',False,**mapping)
-    region_lock.release()
+    user_id = f"{credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])}"
+    if len(arguments['regions'])>1:
+        region_list = [
+            get_sql_list([f"'{user_id}'", f"'{credentials_factory.get_region_id(region['country'], region['region_name'])}'"]) for region in arguments['regions']
+        ]
+        mapping = {
+            '{region_list}': ",".join(region_list)
+        }
+        region_lock.acquire()
+        database_connection.execute_query('insert_regions_user',False,**mapping)
+        region_lock.release()
+    else:
+        region_id = credentials_factory.get_region_id(arguments['regions'][0]['country'], arguments['regions'][0]['region_name'])
+
+        mapping = {
+            '{user_id}': f"'{user_id}'",
+            '{region_id}': f"'{region_id}'"
+        }
+        region_lock.acquire()
+        database_connection.execute_query('insert_region_user', False, **mapping)
+        region_lock.release()
 
 def get_change_user_name_mapping(credentials_factory: CredentialsFactory, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
     existing_user_id = f"'{credentials_factory.get_user_id(arguments['existing_first_name'],arguments['existing_last_name'])}'"
+    new_user_id = f"'{credentials_factory.get_user_id(arguments['new_first_name'], arguments['new_last_name'])}'"
     return {
             '{existing_user_id}': existing_user_id,
             '{new_first_name}': f"'{arguments['new_first_name']}'",
-            '{new_last_name}': f"'{arguments['new_last_name']}'"
+            '{new_last_name}': f"'{arguments['new_last_name']}'",
+            '{new_user_id}': new_user_id
         }
 
 def verify_and_insert_job(credentials_factory: CredentialsFactory ,database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]) -> str:
@@ -235,7 +257,7 @@ def verify_and_insert_job(credentials_factory: CredentialsFactory ,database_conn
     return dict()
 
 def get_job_mapping(credentials_factory: CredentialsFactory, arguments: Dict[str,Union[str, List[Dict[str,str]]]])-> dict:
-    user_id_owner = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])
+    user_id_owner = credentials_factory.get_user_id(arguments['first_name_owner'],arguments['last_name_owner'])
     region_id = credentials_factory.get_region_id(cast(Dict[str,str],arguments['region'])['country'],cast(Dict[str,str],arguments['region'])['region_name'])
     return {
         '{job_id}': f"'{credentials_factory.get_job_id(arguments['title'],user_id_owner,region_id)}'",
@@ -318,24 +340,55 @@ def update_picture_job_mapping_with_optional_information(mapping_pictures: List[
 
 
 def insert_labels_job(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:[Dict[str,Union[str, List[Dict[str,str]]]]]):
-    user_id_owner = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
+    user_id_owner = credentials_factory.get_user_id(arguments['first_name_owner'], arguments['last_name_owner'])
     region_id = credentials_factory.get_region_id(cast(Dict[str, str], arguments['region'])['country'],
                                                   cast(Dict[str, str], arguments['region'])['region_name'])
     job_id = credentials_factory.get_job_id(arguments['title'],user_id_owner,region_id)
-    label_list = [
-        get_sql_list([f"'{job_id}'", f"'{label['label_name']}'"]) for label in arguments['labels']
-    ]
-    mapping = {
-        '{label_list}': get_sql_list(label_list)
-    }
-    label_job_lock.acquire()
-    database_connection.execute_query('insert_labels_job',False, **mapping)
-    label_job_lock.release()
+    if len(arguments['labels']) > 1:
+        label_list = [
+            get_sql_list([f"'{job_id}'", f"'{label['label_name']}'"]) for label in arguments['labels']
+        ]
+        mapping = {
+            '{label_list}': ",".join(label_list)
+        }
+        label_job_lock.acquire()
+        database_connection.execute_query('insert_labels_job',False, **mapping)
+        label_job_lock.release()
+    else:
+        label_name = arguments['labels'][0]['label_name']
+        mapping = {
+            '{job_id}': f"'{job_id}'",
+            '{label_name}': f"'{label_name}'"
+        }
+        label_job_lock.acquire()
+        database_connection.execute_query('insert_label_job', False, **mapping)
+        label_job_lock.release()
 
 def get_change_job_title_mapping(credentials_factory:CredentialsFactory, arguments:[Dict[str,Union[str, List[Dict[str,str]]]]]):
-    existing_job_id = credentials_factory.get_user_id(arguments['existing_first_name'],
-                                                       arguments['existing_last_name'])
+    user_id_owner = credentials_factory.get_user_id(arguments['first_name_owner'], arguments['last_name_owner'])
+    region_id = credentials_factory.get_region_id(cast(Dict[str, str], arguments['region'])['country'],
+                                                  cast(Dict[str, str], arguments['region'])['region_name'])
+
+    existing_job_id = credentials_factory.get_job_id(arguments['existing_title'], user_id_owner, region_id)
+    new_job_id = credentials_factory.get_job_id(arguments['new_title'], user_id_owner, region_id)
     return {
         '{existing_job_id}': f"'{existing_job_id}'",
-        '{new_title}': f"'{arguments['title']}'"
+        '{new_title}': f"'{arguments['new_title']}'",
+        '{new_job_id}': f"'{new_job_id}'"
+    }
+
+def get_change_job_region_mapping(credentials_factory:CredentialsFactory, arguments:[Dict[str,Union[str, List[Dict[str,str]]]]]):
+    user_id_owner = credentials_factory.get_user_id(arguments['first_name_owner'], arguments['last_name_owner'])
+    current_region_id = credentials_factory.get_region_id(cast(Dict[str, str], arguments['current_region'])['country'],
+                                                  cast(Dict[str, str], arguments['current_region'])['region_name'])
+    new_region_id = credentials_factory.get_region_id(cast(Dict[str, str], arguments['new_region'])['country'],
+                                                          cast(Dict[str, str], arguments['new_region'])[
+                                                              'region_name'])
+    existing_job_id = credentials_factory.get_job_id(arguments['title'],  user_id_owner, current_region_id)
+    new_job_id = credentials_factory.get_job_id(arguments['title'], user_id_owner,new_region_id)
+    print(new_job_id)
+    return {
+        '{existing_job_id}': f"'{existing_job_id}'",
+        '{new_region_id}': f"'{new_region_id}'",
+        '{new_job_id}': f"'{new_job_id}'"
     }
