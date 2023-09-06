@@ -8,7 +8,7 @@ def test_activity_feed():
         'country': 'Belgium',
         'region_name': 'Brussels Capital Region'
     }]
-    r = requests.get('http://127.0.0.1:5000/activity_feed', json=arguments)
+    r = requests.get('http://127.0.0.1:8080/activity_feed', json=arguments)
     print('ACTIVITY_FEED:')
     print(r.json())
     print('______________________________________________')
@@ -23,7 +23,7 @@ def test_active_jobs_in_regions():
             'country': 'Belgium',
             'region_name': 'West Flanders'
         }]
-    r = requests.get('http://127.0.0.1:5000/active_jobs_in_region', json=arguments)
+    r = requests.get('http://127.0.0.1:8080/active_jobs_in_region', json=arguments)
     print('ACTIVE_JOBS_IN_REGION:')
     print(r.json())
     print('______________________________________________')
@@ -34,7 +34,7 @@ def test_completed_jobs_by_user():
         'first_name': 'Judith',
         'last_name': 'Van Looveren'
     }
-    r = requests.get('http://127.0.0.1:5000/completed_jobs_by_user', json=arguments)
+    r = requests.get('http://127.0.0.1:8080/completed_jobs_by_user', json=arguments)
     print('COMPLETED_JOBS_BY_USER:')
     print(r.json())
     print('______________________________________________')
@@ -45,7 +45,7 @@ def test_accepted_jobs_by_user():
         'first_name': 'Judith',
         'last_name': 'Van Looveren'
     }
-    r = requests.get('http://127.0.0.1:5000/accepted_jobs_by_user', json=arguments)
+    r = requests.get('http://127.0.0.1:8080/accepted_jobs_by_user', json=arguments)
     print('ACCEPTED_JOBS_BY_USER:')
     print(r.json())
     print('______________________________________________')
@@ -56,7 +56,7 @@ def test_liked_jobs_by_user():
         'first_name': 'Judith',
         'last_name': 'Van Looveren'
     }
-    r = requests.get('http://127.0.0.1:5000/liked_jobs_by_user', json=arguments)
+    r = requests.get('http://127.0.0.1:8080/liked_jobs_by_user', json=arguments)
     print('LIKED_JOBS_BY_USER:')
     print(r.json())
     print('______________________________________________')
@@ -67,7 +67,7 @@ def test_owned_jobs_by_user():
         'first_name': 'Nation',
         'last_name': 'Builder'
     }
-    r = requests.get('http://127.0.0.1:5000/jobs_owned_by_user', json=arguments)
+    r = requests.get('http://127.0.0.1:8080/jobs_owned_by_user', json=arguments)
     print('OWNED_JOBS_BY_USER:')
     print(r.json())
     print('______________________________________________')
@@ -78,7 +78,7 @@ def test_all_users_in_region():
         'country': 'Belgium',
         'region_name': 'Brussels Capital Region'
     }]
-    r = requests.get('http://127.0.0.1:5000/all_users_in_region', json=arguments)
+    r = requests.get('http://127.0.0.1:8080/all_users_in_region', json=arguments)
     print('ALL USERS IN REGION:')
     print(r.json())
     print('______________________________________________')
@@ -102,7 +102,7 @@ def test_search_jobs():
                 'last_name': 'Build'
             })
 
-        r = requests.get('http://127.0.0.1:5000/search_jobs', json=arguments)
+        r = requests.get('http://127.0.0.1:8080/search_jobs', json=arguments)
         print(f'SEARCH_JOBS:{type}')
         print(r.json())
         print('______________________________________________')
@@ -122,7 +122,7 @@ def test_search_users():
                 'last_name': 'Build'
             })
 
-        r = requests.get('http://127.0.0.1:5000/search_users', json=arguments)
+        r = requests.get('http://127.0.0.1:8080/search_users', json=arguments)
         print(f'SEARCH_USERS:{type}')
         print(r.json())
         print('______________________________________________')
@@ -133,7 +133,7 @@ def test_match_jobs():
         'first_name': 'Judith',
         'last_name': 'Van Looveren'
     }
-    r = requests.get('http://127.0.0.1:5000/match_jobs', json=arguments)
+    r = requests.get('http://127.0.0.1:8080/match_jobs', json=arguments)
     print('MATCHED_JOBS:')
     print(r.json())
     print('______________________________________________')
@@ -165,7 +165,7 @@ def test_insert_or_update_user():
         'rating': 5,
         'number_of_ratings': 1
     }
-    r = requests.post('http://127.0.0.1:5000/user', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user', json=arguments)
     print('USER1:')
     print(r)
     print(r.json())
@@ -202,7 +202,7 @@ def test_insert_or_update_user():
         'rating': 5,
         'number_of_ratings': 1
     }
-    r = requests.post('http://127.0.0.1:5000/user', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user', json=arguments)
     print('USER2:')
     print(r)
     print(r.json())
@@ -216,7 +216,7 @@ def test_change_user_name():
         'new_first_name': 'Frontend',
         'new_last_name': 'Beest',
     }
-    r = requests.post('http://127.0.0.1:5000/change_user_name', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/change_user_name', json=arguments)
     print('USER CHANGE NAME:')
     print(r)
     print(r.json())
@@ -243,7 +243,7 @@ def test_insert_or_update_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('http://127.0.0.1:5000/job', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/job', json=arguments)
     print('JOB1:')
     print(r)
     print(r.json())
@@ -268,7 +268,7 @@ def test_insert_or_update_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('http://127.0.0.1:5000/job', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/job', json=arguments)
     print('JOB2:')
     print(r)
     print(r.json())
@@ -287,7 +287,7 @@ def test_change_job_title():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('http://127.0.0.1:5000/change_job_title', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/change_job_title', json=arguments)
     print('USER JOB TITLE:')
     print(r)
     print(r.json())
@@ -308,7 +308,7 @@ def test_change_job_region():
         'last_name_owner': 'Builder',
         'title': 'repair of chain of bike'
     }
-    r = requests.post('http://127.0.0.1:5000/change_job_region', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/change_job_region', json=arguments)
     print('CHANGE JOB REGION:')
     print(r)
     print(r.json())
@@ -327,7 +327,7 @@ def test_user_liked_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('http://127.0.0.1:5000/user_liked_job', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user_liked_job', json=arguments)
     print('USER LIKED JOB:')
     print(r)
     print(r.json())
@@ -345,7 +345,7 @@ def test_user_unliked_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('http://127.0.0.1:5000/user_unliked_job', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user_unliked_job', json=arguments)
     print('USER UNLIKED JOB:')
     print(r)
     print(r.json())
@@ -364,7 +364,7 @@ def test_user_accepted_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('http://127.0.0.1:5000/user_accepted_job', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user_accepted_job', json=arguments)
     print('USER ACCEPTED JOB:')
     print(r)
     print(r.json())
@@ -382,7 +382,7 @@ def test_user_completed_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('http://127.0.0.1:5000/user_completed_job', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user_completed_job', json=arguments)
     print('USER COMPLETED JOB:')
     print(r)
     print(r.json())
@@ -400,7 +400,7 @@ def test_user_not_completed_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('http://127.0.0.1:5000/user_not_complete_job', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user_not_complete_job', json=arguments)
     print('USER NOT COMPLETED JOB:')
     print(r)
     print(r.json())
@@ -412,7 +412,7 @@ def test_user_receive_rating():
         'last_name': 'Van Looveren',
         'rating' : 5
     }
-    r = requests.post('http://127.0.0.1:5000/user_received_rating', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user_received_rating', json=arguments)
     print('USER RECEIVED RATING1:')
     print(r)
     print(r.json())
@@ -422,7 +422,7 @@ def test_user_receive_rating():
         'last_name': 'Van Looveren',
         'rating': 4
     }
-    r = requests.post('http://127.0.0.1:5000/user_received_rating', json=arguments)
+    r = requests.post('http://127.0.0.1:8080/user_received_rating', json=arguments)
     print('USER RECEIVED RATING2:')
     print(r)
     print(r.json())
