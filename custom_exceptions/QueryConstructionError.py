@@ -1,0 +1,2 @@
+class QueryConstructionError(Exception):
+    pass

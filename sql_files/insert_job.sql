@@ -1,0 +1,19 @@
+INSERT INTO jobs(
+                 job_id,
+                 description,
+                 title,
+                 region_id,
+                 user_id_owner,
+                 location
+                {datetime_made_utc_key}
+                {datetime_expires_utc_key}
+)VALUES(
+           {job_id},
+           {description},
+           {title},
+           {region_id},
+            {user_id_owner},
+           {location}
+            {datetime_made_utc_content}
+           {datetime_expires_utc_content}
+       );
