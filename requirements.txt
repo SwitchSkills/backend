@@ -7,3 +7,4 @@ Flask-SQLAlchemy
 structlog
 PyYAML
 pg8000
+SQLAlchemy
