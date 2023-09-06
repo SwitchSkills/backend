@@ -5,4 +5,4 @@ pandas
 cloud-sql-python-connector
 Flask-SQLAlchemy
 structlog
-yaml
+pyyaml
