@@ -57,7 +57,9 @@ helper (only for completed)
 @catch_sever_crash
 def activity_feed():
     print("in activity_feed")
+    print(request)
     arguments = request.get_json()
+    print(arguments)
     try:
         region_id_list = get_sql_list([f"'{credentials_factory.get_region_id(region['country'],region['region_name'])}'" for region in arguments])
     except KeyError as e:
