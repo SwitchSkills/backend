@@ -2,7 +2,7 @@ from structlog import get_logger
 from config.ConfigWrapper import ConfigWrapper
 logger = get_logger()
 config = ConfigWrapper("config")
-DEBUG =True
+DEBUG =False
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
