@@ -26,4 +26,4 @@ def before_request_func():
     g.start_time = time.time()
     g.execution_id = execution_id
 
-    logger.info(f"id: {g.execution_id}\n ROUTE CALLED {request.url}")
+    print(f"id: {g.execution_id}\n ROUTE CALLED {request.url}")

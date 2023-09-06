@@ -56,6 +56,7 @@ helper (only for completed)
 @app.get('/activity_feed')
 @catch_sever_crash
 def activity_feed():
+    print("in activity_feed")
     arguments = request.get_json()
     try:
         region_id_list = get_sql_list([f"'{credentials_factory.get_region_id(region['country'],region['region_name'])}'" for region in arguments])
@@ -70,7 +71,7 @@ def activity_feed():
     mapping = {
         '{region_id_list}': region_id_list
     }
-
+    print("to db conn")
     completed_jobs_in_region = database_connection.execute_query('completed_jobs_in_region', **mapping)
     open_jobs_in_region = database_connection.execute_query('jobs_in_region', **mapping)
     accepted_jobs_in_region = database_connection.execute_query('accepted_jobs_in_region',**mapping)
