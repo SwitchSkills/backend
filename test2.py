@@ -190,7 +190,7 @@ def test_insert_or_update_user():
             'label_name': 'bicycle repair'
         },
             {
-                'label_name': 'test'
+                'label_name': 'gardening'
             }],
         'regions': [
             {
@@ -262,7 +262,7 @@ def test_insert_or_update_job():
         'labels': [{
             'label_name': 'bicycle repair'
         },
-            {'label_name': 'test'}],
+            {'label_name': 'gardening'}],
         'region':
             {
                 'region_name': 'Brussels Capital Region',

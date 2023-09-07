@@ -145,7 +145,15 @@ VALUES(
 INSERT INTO labels(label_name,description)
 VALUES
     ('bicycle repair', 'mechanical repair for non-electric bicycles'),
-    ('test','testing purposes');
+    ('gardening','all jobs related to garden maintenance, except the use of dangers pesticides'),
+    ('car maintenance', 'small mechanical maintenance works on non-electric cars'),
+    ('sewing', 'repair job and/or fitting'),
+    ('plumbing repair', 'all repair jobs that do not require walls and/or floors to be opened up'),
+    ('electrical issue', 'all non-electronics jobs that do not require major demolitions'),
+    ('computer maintenance', 'all software related fixes on general purposes computers'),
+    ('electronics issue', 'all low level coding and/or hardware issues with electronic devices'),
+    ('help for school','any work related to teaching and tutoring'),
+    ('keeping company','someone to keep you or a loved one company; includes babysitting, dog walking etc');
 
 INSERT INTO jobs(
                  job_id,
