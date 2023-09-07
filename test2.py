@@ -1,6 +1,9 @@
 import json
 
 import requests
+import urlfetch
+# Use the App Engine Requests adapter. This makes sure that Requests uses
+# URLFetch.
 
 
 def test_activity_feed():
@@ -8,7 +11,7 @@ def test_activity_feed():
         'country': 'Belgium',
         'region_name': 'Brussels Capital Region'
     }]
-    r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/activity_feed', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/activity_feed', json=arguments)
     print('ACTIVITY_FEED:')
     print(r.json())
     print('______________________________________________')
@@ -23,7 +26,7 @@ def test_active_jobs_in_regions():
             'country': 'Belgium',
             'region_name': 'West Flanders'
         }]
-    r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/active_jobs_in_region', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/active_jobs_in_region', json=arguments)
     print('ACTIVE_JOBS_IN_REGION:')
     print(r.json())
     print('______________________________________________')
@@ -34,7 +37,7 @@ def test_completed_jobs_by_user():
         'first_name': 'Judith',
         'last_name': 'Van Looveren'
     }
-    r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/completed_jobs_by_user', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/completed_jobs_by_user', json=arguments)
     print('COMPLETED_JOBS_BY_USER:')
     print(r.json())
     print('______________________________________________')
@@ -45,7 +48,7 @@ def test_accepted_jobs_by_user():
         'first_name': 'Judith',
         'last_name': 'Van Looveren'
     }
-    r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/accepted_jobs_by_user', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/accepted_jobs_by_user', json=arguments)
     print('ACCEPTED_JOBS_BY_USER:')
     print(r.json())
     print('______________________________________________')
@@ -56,7 +59,7 @@ def test_liked_jobs_by_user():
         'first_name': 'Judith',
         'last_name': 'Van Looveren'
     }
-    r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/liked_jobs_by_user', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/liked_jobs_by_user', json=arguments)
     print('LIKED_JOBS_BY_USER:')
     print(r.json())
     print('______________________________________________')
@@ -67,7 +70,7 @@ def test_owned_jobs_by_user():
         'first_name': 'Nation',
         'last_name': 'Builder'
     }
-    r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/jobs_owned_by_user', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/jobs_owned_by_user', json=arguments)
     print('OWNED_JOBS_BY_USER:')
     print(r.json())
     print('______________________________________________')
@@ -78,7 +81,7 @@ def test_all_users_in_region():
         'country': 'Belgium',
         'region_name': 'Brussels Capital Region'
     }]
-    r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/all_users_in_region', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/all_users_in_region', json=arguments)
     print('ALL USERS IN REGION:')
     print(r.json())
     print('______________________________________________')
@@ -102,7 +105,7 @@ def test_search_jobs():
                 'last_name': 'Build'
             })
 
-        r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/search_jobs', json=arguments)
+        r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/search_jobs', json=arguments)
         print(f'SEARCH_JOBS:{type}')
         print(r.json())
         print('______________________________________________')
@@ -122,7 +125,7 @@ def test_search_users():
                 'last_name': 'Build'
             })
 
-        r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/search_users', json=arguments)
+        r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/search_users', json=arguments)
         print(f'SEARCH_USERS:{type}')
         print(r.json())
         print('______________________________________________')
@@ -133,7 +136,7 @@ def test_match_jobs():
         'first_name': 'Judith',
         'last_name': 'Van Looveren'
     }
-    r = requests.get('https://skillswitch-djzpurkahq-ew.a.run.app/match_jobs', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/match_jobs', json=arguments)
     print('MATCHED_JOBS:')
     print(r.json())
     print('______________________________________________')
@@ -165,7 +168,7 @@ def test_insert_or_update_user():
         'rating': 5,
         'number_of_ratings': 1
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user', json=arguments)
     print('USER1:')
     print(r)
     print(r.json())
@@ -202,7 +205,7 @@ def test_insert_or_update_user():
         'rating': 5,
         'number_of_ratings': 1
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user', json=arguments)
     print('USER2:')
     print(r)
     print(r.json())
@@ -216,7 +219,7 @@ def test_change_user_name():
         'new_first_name': 'Frontend',
         'new_last_name': 'Beest',
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/change_user_name', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/change_user_name', json=arguments)
     print('USER CHANGE NAME:')
     print(r)
     print(r.json())
@@ -243,7 +246,7 @@ def test_insert_or_update_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/job', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/job', json=arguments)
     print('JOB1:')
     print(r)
     print(r.json())
@@ -268,7 +271,7 @@ def test_insert_or_update_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/job', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/job', json=arguments)
     print('JOB2:')
     print(r)
     print(r.json())
@@ -287,7 +290,7 @@ def test_change_job_title():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/change_job_title', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/change_job_title', json=arguments)
     print('USER JOB TITLE:')
     print(r)
     print(r.json())
@@ -308,7 +311,7 @@ def test_change_job_region():
         'last_name_owner': 'Builder',
         'title': 'repair of chain of bike'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/change_job_region', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/change_job_region', json=arguments)
     print('CHANGE JOB REGION:')
     print(r)
     print(r.json())
@@ -327,7 +330,7 @@ def test_user_liked_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user_liked_job', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user_liked_job', json=arguments)
     print('USER LIKED JOB:')
     print(r)
     print(r.json())
@@ -346,7 +349,7 @@ def test_user_unliked_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user_unliked_job', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user_unliked_job', json=arguments)
     print('USER UNLIKED JOB:')
     print(r)
     print(r.json())
@@ -365,7 +368,7 @@ def test_user_accepted_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user_accepted_job', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user_accepted_job', json=arguments)
     print('USER ACCEPTED JOB:')
     print(r)
     print(r.json())
@@ -384,7 +387,7 @@ def test_user_completed_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user_completed_job', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user_completed_job', json=arguments)
     print('USER COMPLETED JOB:')
     print(r)
     print(r.json())
@@ -403,7 +406,7 @@ def test_user_not_completed_job():
         'first_name_owner': 'Nation',
         'last_name_owner': 'Builder'
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user_not_complete_job', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user_not_complete_job', json=arguments)
     print('USER NOT COMPLETED JOB:')
     print(r)
     print(r.json())
@@ -416,7 +419,7 @@ def test_user_receive_rating():
         'last_name': 'Van Looveren',
         'rating': 5
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user_received_rating', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user_received_rating', json=arguments)
     print('USER RECEIVED RATING1:')
     print(r)
     print(r.json())
@@ -426,12 +429,26 @@ def test_user_receive_rating():
         'last_name': 'Van Looveren',
         'rating': 4
     }
-    r = requests.post('https://skillswitch-djzpurkahq-ew.a.run.app/user_received_rating', json=arguments)
+    r = requests.post('https://ethereal-yen-394407.ew.r.appspot.com/user_received_rating', json=arguments)
     print('USER RECEIVED RATING2:')
     print(r)
     print(r.json())
     print('______________________________________________')
 
+
+def test_all_labels():
+    r = requests.get('https://ethereal-yen-394407.ew.r.appspot.com/all_labels')
+    print('ALL LABELS:')
+    print(r)
+    print(r.json())
+    print('______________________________________________')
+
+
+def test_all_regions():
+    r = requests.get('https://ethereal-yen-394407.ew.r.appspot.com/all_regions')
+    print(r)
+    print(r.json())
+    print('______________________________________________')
 
 if __name__ == '__main__':
     test_activity_feed()
@@ -455,3 +472,6 @@ if __name__ == '__main__':
     test_user_completed_job()
     test_user_not_completed_job()
     test_user_receive_rating()
+    test_all_labels()
+    test_all_regions()
+

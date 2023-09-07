@@ -49,7 +49,7 @@ code 200
 """
 
 
-@app.post('/user')
+@app.route('/user',methods=['GET', 'POST'])
 @catch_sever_crash
 def user():
     arguments = request.get_json()
@@ -84,7 +84,7 @@ code 200
 """
 
 
-@app.post("/change_user_name")
+@app.route("/change_user_name",methods=['GET', 'POST'])
 @catch_sever_crash
 def change_user_name():
     arguments = request.get_json()
@@ -138,7 +138,7 @@ code 200
 """
 
 
-@app.post('/job')
+@app.route('/job',methods=['GET', 'POST'])
 @catch_sever_crash
 def job():
     arguments = request.get_json()
@@ -177,7 +177,7 @@ code 200
 """
 
 
-@app.post('/change_job_title')
+@app.route('/change_job_title',methods=['GET', 'POST'])
 @catch_sever_crash
 def change_job_title():
     arguments = request.get_json()
@@ -230,7 +230,7 @@ code 500 (server error)
 ON SUCCESS (dictionary)
 code 200
 """
-@app.post('/change_job_region')
+@app.route('/change_job_region',methods=['GET', 'POST'])
 @catch_sever_crash
 def change_job_region():
     arguments = request.get_json()
@@ -283,7 +283,7 @@ code 200
 """
 
 
-@app.post('/user_liked_job')
+@app.route('/user_liked_job',methods=['GET', 'POST'])
 @catch_sever_crash
 def user_liked_job():
     arguments = request.get_json()
@@ -348,7 +348,7 @@ code 200
 """
 
 
-@app.post('/user_unliked_job')
+@app.route('/user_unliked_job',methods=['GET', 'POST'])
 @catch_sever_crash
 def user_unliked_job():
     arguments = request.get_json()
@@ -410,7 +410,7 @@ code 200
 """
 
 
-@app.post('/user_accepted_job')
+@app.route('/user_accepted_job',methods=['GET', 'POST'])
 @catch_sever_crash
 def user_accepted_job():
     arguments = request.get_json()
@@ -489,7 +489,7 @@ code 200
 """
 
 
-@app.post('/user_completed_job')
+@app.route('/user_completed_job',methods=['GET', 'POST'])
 @catch_sever_crash
 def user_completed_job():
     arguments = request.get_json()
@@ -561,7 +561,7 @@ code 200
 """
 
 
-@app.post('/user_not_complete_job')
+@app.route('/user_not_complete_job',methods=['GET', 'POST'])
 @catch_sever_crash
 def user_not_completed_job():
     arguments = request.get_json()
@@ -618,7 +618,7 @@ ASSUMPTION: rating comes from user that completed a job
 """
 
 
-@app.post('/user_received_rating')
+@app.route('/user_received_rating',methods=['GET', 'POST'])
 @catch_sever_crash
 def user_received_rating():
     arguments = request.get_json()
