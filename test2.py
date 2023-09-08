@@ -176,7 +176,7 @@ def test_insert_or_update_user():
     arguments = {
         'first_name': 'Dag',
         'last_name': 'Malstaf',
-        'email_address': 'study_man@gmail.com',
+        'email_address': 'study_boy@gmail.com',
         'phone_number': '+32471785072',
         'alternative_communications': 'https://www.linkedin.com/in/dag-malstaf/',
         'bibliography': 'killing other CS students with gracefulness',

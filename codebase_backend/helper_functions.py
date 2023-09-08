@@ -119,8 +119,7 @@ def verify_and_insert_user(credentials_factory: CredentialsFactory ,database_con
     update_user_mapping_with_optional_information(mapping_user,arguments)
     user_lock.acquire()
     try:
-        database_connection.execute_query('delete_user',False,**mapping_user)
-        database_connection.execute_query('insert_user',False,**mapping_user)
+        database_connection.execute_query(['delete_user', 'insert_user'],False,**mapping_user)
     finally:
         user_lock.release()
     return str()
@@ -167,8 +166,6 @@ def insert_picture_user(credentials_factory: CredentialsFactory, database_connec
     picture_lock.acquire()
     try:
         database_connection.execute_query('insert_picture',False,**mapping_picture)
-    except pymysql.err.IntegrityError as e:
-        pass
     finally:
         picture_lock.release()
 
@@ -264,8 +261,7 @@ def verify_and_insert_job(credentials_factory: CredentialsFactory ,database_conn
     update_job_mapping_with_optional_information(mapping_job,arguments)
     job_lock.acquire()
     try:
-        database_connection.execute_query('delete_job',False,**mapping_job)
-        database_connection.execute_query('insert_job',False,**mapping_job)
+        database_connection.execute_query(['delete_job','insert_job'],False,**mapping_job)
     except ResourceClosedError:
         pass
     finally:
