@@ -3,7 +3,8 @@ import json
 
 from codebase_backend import app, logger, credentials_factory, database_connection
 from codebase_backend.decorators import catch_sever_crash
-from codebase_backend.helper_functions import search_user_mapping_and_query
+from codebase_backend.helper_functions import search_user_mapping_and_query, no_none_check_list_of_dict, \
+    no_none_check_dict
 from sql_files.sql_helper_functions import get_sql_list
 
 
@@ -56,10 +57,14 @@ helper (only for completed)
 @app.route('/activity_feed', methods=['GET', 'POST'])
 @catch_sever_crash
 def activity_feed():
-    print("in activity_feed")
-    print(request)
     arguments = request.get_json()
-    print(arguments)
+    if not no_none_check_list_of_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         region_id_list = get_sql_list(
             [f"'{credentials_factory.get_region_id(region['country'], region['region_name'])}'" for region in
@@ -75,7 +80,6 @@ def activity_feed():
     mapping = {
         '{region_id_list}': region_id_list
     }
-    print("to db conn")
     completed_jobs_in_region = database_connection.execute_query('completed_jobs_in_region', **mapping)
     open_jobs_in_region = database_connection.execute_query('jobs_in_region', **mapping)
     accepted_jobs_in_region = database_connection.execute_query('accepted_jobs_in_region', **mapping)
@@ -131,6 +135,13 @@ owner
 @catch_sever_crash
 def active_jobs_in_region():
     arguments = request.get_json()
+    if not no_none_check_list_of_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         region_id_list = get_sql_list(
             [f"'{credentials_factory.get_region_id(region['country'], region['region_name'])}'" for region in
@@ -191,7 +202,15 @@ owner
 @app.route('/completed_jobs_by_user',methods=['GET', 'POST'])
 @catch_sever_crash
 def completed_jobs_by_user():
+
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         user_id = f"'{credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])}'"
     except KeyError as e:
@@ -252,6 +271,13 @@ owner
 @catch_sever_crash
 def accepted_jobs_by_user():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         user_id = f"'{credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])}'"
     except KeyError as e:
@@ -312,6 +338,13 @@ owner
 @catch_sever_crash
 def liked_jobs_by_user():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         user_id = f"'{credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])}'"
     except KeyError as e:
@@ -371,6 +404,13 @@ owner (would send so you can keep reusing the feed you made + shows how others s
 @catch_sever_crash
 def jobs_owned_by_user():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         user_id = f"'{credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])}'"
     except KeyError as e:
@@ -425,6 +465,13 @@ user
 @catch_sever_crash
 def all_users_in_region():
     arguments = request.get_json()
+    if not no_none_check_list_of_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         region_id_list = get_sql_list(
             [f"'{credentials_factory.get_region_id(region['country'], region['region_name'])}'" for region in
@@ -493,6 +540,13 @@ owner
 @catch_sever_crash
 def search_jobs():
     arguments = request.get_json()
+    if not no_none_check_list_of_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         search_query = 'search_jobs_on_' + arguments['type']
         region_id_list = get_sql_list(
@@ -567,6 +621,13 @@ user
 def search_users():
     # (full_name, bibliography, email_address, phone_number)
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         mapping, search_query = search_user_mapping_and_query(arguments)
     except KeyError as e:
@@ -627,6 +688,13 @@ user
 def login():
     # (full_name, bibliography, email_address, phone_number)
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         mapping, search_query = search_user_mapping_and_query(arguments, login=True)
     except KeyError as e:
@@ -700,6 +768,13 @@ owner
 @catch_sever_crash
 def match_jobs():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         user_id = f"'{credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])}'"
     except KeyError as e:

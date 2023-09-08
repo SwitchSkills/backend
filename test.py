@@ -485,5 +485,4 @@ def test_login():
     print(r.json())
     print('______________________________________________')
 if __name__ == '__main__':
-    test_search_users()
-    test_login()
+    test_activity_feed()

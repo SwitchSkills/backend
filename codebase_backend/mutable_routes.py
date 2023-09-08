@@ -8,7 +8,7 @@ from codebase_backend import app, credentials_factory, database_connection, logg
 from codebase_backend.decorators import catch_sever_crash
 from codebase_backend.helper_functions import verify_and_insert_user, get_change_user_name_mapping, insert_picture_user, \
     insert_regions_user, insert_labels_user, verify_and_insert_job, insert_pictures_job, insert_labels_job, \
-    get_change_job_title_mapping, verify_regions, get_change_job_region_mapping
+    get_change_job_title_mapping, verify_regions, get_change_job_region_mapping, no_none_check_dict
 from codebase_backend.semaphores import user_lock, completed_job_lock, liked_job_lock
 
 
@@ -53,6 +53,13 @@ code 200
 @catch_sever_crash
 def user():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     if error_message := verify_and_insert_user(credentials_factory, database_connection, arguments):
         return error_message
 
@@ -88,7 +95,13 @@ code 200
 @catch_sever_crash
 def change_user_name():
     arguments = request.get_json()
-
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     try:
         mapping = get_change_user_name_mapping(credentials_factory, arguments)
     except KeyError as e:
@@ -142,6 +155,13 @@ code 200
 @catch_sever_crash
 def job():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     arguments.update({
         'regions': [arguments['region']]  # recycle check code from user regions
     })
@@ -181,6 +201,13 @@ code 200
 @catch_sever_crash
 def change_job_title():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     arguments.update({
         'regions': [arguments['region']]  # recycle check code from user regions
     })
@@ -234,6 +261,13 @@ code 200
 @catch_sever_crash
 def change_job_region():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     arguments.update({
         'regions': [arguments['current_region'],arguments['new_region']]  # recycle check code from user regions
     })
@@ -287,6 +321,13 @@ code 200
 @catch_sever_crash
 def user_liked_job():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     arguments.update({
         'regions': [arguments['job_region']]  # recycle check code from user regions
     })
@@ -352,6 +393,13 @@ code 200
 @catch_sever_crash
 def user_unliked_job():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     arguments.update({
         'regions': [arguments['job_region']]  # recycle check code from user regions
     })
@@ -414,6 +462,13 @@ code 200
 @catch_sever_crash
 def user_accepted_job():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     arguments.update({
         'regions': [arguments['job_region']]  # recycle check code from user regions
     })
@@ -493,6 +548,13 @@ code 200
 @catch_sever_crash
 def user_completed_job():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     arguments.update({
         'regions': [arguments['job_region']]  # recycle check code from user regions
     })
@@ -565,6 +627,13 @@ code 200
 @catch_sever_crash
 def user_not_completed_job():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     arguments.update({
         'regions': [arguments['job_region']]  # recycle check code from user regions
     })
@@ -622,6 +691,13 @@ ASSUMPTION: rating comes from user that completed a job
 @catch_sever_crash
 def user_received_rating():
     arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
     if arguments['rating'] > 5 or arguments['rating'] < 0:
         return json.dumps(
             {

@@ -433,3 +433,19 @@ def search_user_mapping_and_query(arguments:[Dict[str,Union[str, List[Dict[str,s
             '{search}': base_string.format(content = arguments['search'])
         })
     return mapping, search_query
+
+def no_none_check_list_of_dict(list_of_dict):
+    for dictionary in list_of_dict:
+        if not no_none_check_dict(dictionary):
+            return False
+    return True
+def no_none_check_dict(dictionary):
+    for value in dictionary.values():
+        if not value:
+            return False
+        elif type(value) == list:
+            return no_none_check_list_of_dict(value)
+        elif type(value) == dict:
+            return no_none_check_dict(value)
+
+    return True
