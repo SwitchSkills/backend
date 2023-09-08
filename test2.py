@@ -145,13 +145,13 @@ def test_match_jobs():
 def test_insert_or_update_user():
     arguments = {
         'first_name': 'Dag',
-        'last_name': 'Malstaf',
+        'last_name': 'yoy',
         'email_address': 'study_boy@gmail.com',
-        'phone_number': '+32471785072',
+        'phone_number': '+32',
         'alternative_communications': 'https://www.linkedin.com/in/dag-malstaf/',
         'bibliography': 'killing other CS students with gracefulness',
         'picture': {
-            'picture_location_firebase': 'test_location',
+            'picture_location_firebase': 'test_location_yoy',
             'description': 'testing purposes'
         },
         'password': 'test_for_dummies',
@@ -176,12 +176,12 @@ def test_insert_or_update_user():
     arguments = {
         'first_name': 'Dag',
         'last_name': 'Malstaf',
-        'email_address': 'study_boy@gmail.com',
+        'email_address': 'study_man@gmail.com',
         'phone_number': '+32471785072',
         'alternative_communications': 'https://www.linkedin.com/in/dag-malstaf/',
         'bibliography': 'killing other CS students with gracefulness',
         'picture': {
-            'picture_location_firebase': 'test_location',
+            'picture_location_firebase': 'test_location_malstaf',
             'description': 'testing purposes'
         },
         'password': 'test_for_dummies',
@@ -451,27 +451,6 @@ def test_all_regions():
     print('______________________________________________')
 
 if __name__ == '__main__':
-    test_activity_feed()
-    test_active_jobs_in_regions()
-    test_completed_jobs_by_user()
-    test_accepted_jobs_by_user()
-    test_liked_jobs_by_user()
-    test_owned_jobs_by_user()
-    test_all_users_in_region()
-    test_search_jobs()
-    test_search_users()
-    test_match_jobs()
     test_insert_or_update_user()
-    test_change_user_name()
-    test_insert_or_update_job()
-    test_change_job_title()
-    test_change_job_region()
-    test_user_liked_job()
-    test_user_unliked_job()
-    test_user_accepted_job()
-    test_user_completed_job()
-    test_user_not_completed_job()
-    test_user_receive_rating()
-    test_all_labels()
-    test_all_regions()
+
 

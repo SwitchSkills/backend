@@ -1,6 +1,7 @@
 import json
 from typing import Dict, Any, Union, List, cast
 
+import pymysql.err
 from sqlalchemy.exc import ResourceClosedError
 
 from codebase_backend.CredentialsFactory import CredentialsFactory
@@ -117,10 +118,12 @@ def verify_and_insert_user(credentials_factory: CredentialsFactory ,database_con
         )
     update_user_mapping_with_optional_information(mapping_user,arguments)
     user_lock.acquire()
-    database_connection.execute_query('delete_user',False,**mapping_user)
-    database_connection.execute_query('insert_user',False,**mapping_user)
-    user_lock.release()
-    return dict()
+    try:
+        database_connection.execute_query('delete_user',False,**mapping_user)
+        database_connection.execute_query('insert_user',False,**mapping_user)
+    finally:
+        user_lock.release()
+    return str()
 
 def get_picture_mapping(credentials_factory: CredentialsFactory,arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
     picture_dict = cast(Dict[str,str],arguments['picture'])
@@ -162,8 +165,12 @@ def insert_picture_user(credentials_factory: CredentialsFactory, database_connec
         )
     update_picture_mapping_with_optional_information(mapping_picture,arguments)
     picture_lock.acquire()
-    database_connection.execute_query('insert_picture',False,**mapping_picture)
-    picture_lock.release()
+    try:
+        database_connection.execute_query('insert_picture',False,**mapping_picture)
+    except pymysql.err.IntegrityError as e:
+        pass
+    finally:
+        picture_lock.release()
 
 def insert_labels_user(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
     user_id = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])
@@ -175,8 +182,10 @@ def insert_labels_user(credentials_factory: CredentialsFactory, database_connect
             '{label_list}': ",".join(label_list)
         }
         label_user_lock.acquire()
-        database_connection.execute_query('insert_labels_user',False,**mapping)
-        label_user_lock.release()
+        try:
+            database_connection.execute_query('insert_labels_user',False,**mapping)
+        finally:
+            label_user_lock.release()
     else:
         label_name = arguments["labels"][0]['label_name']
         mapping = {
@@ -184,8 +193,10 @@ def insert_labels_user(credentials_factory: CredentialsFactory, database_connect
             "{label_name}": f"'{label_name}'"
         }
         label_user_lock.acquire()
-        database_connection.execute_query('insert_label_user', False, **mapping)
-        label_user_lock.release()
+        try:
+            database_connection.execute_query('insert_label_user', False, **mapping)
+        finally:
+            label_user_lock.release()
 
 
 def insert_regions_user(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
@@ -198,8 +209,10 @@ def insert_regions_user(credentials_factory: CredentialsFactory, database_connec
             '{region_list}': ",".join(region_list)
         }
         region_lock.acquire()
-        database_connection.execute_query('insert_regions_user',False,**mapping)
-        region_lock.release()
+        try:
+            database_connection.execute_query('insert_regions_user',False,**mapping)
+        finally:
+            region_lock.release()
     else:
         region_id = credentials_factory.get_region_id(arguments['regions'][0]['country'], arguments['regions'][0]['region_name'])
 
@@ -208,8 +221,10 @@ def insert_regions_user(credentials_factory: CredentialsFactory, database_connec
             '{region_id}': f"'{region_id}'"
         }
         region_lock.acquire()
-        database_connection.execute_query('insert_region_user', False, **mapping)
-        region_lock.release()
+        try:
+            database_connection.execute_query('insert_region_user', False, **mapping)
+        finally:
+            region_lock.release()
 
 def get_change_user_name_mapping(credentials_factory: CredentialsFactory, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
     existing_user_id = f"'{credentials_factory.get_user_id(arguments['existing_first_name'],arguments['existing_last_name'])}'"
@@ -250,11 +265,12 @@ def verify_and_insert_job(credentials_factory: CredentialsFactory ,database_conn
     job_lock.acquire()
     try:
         database_connection.execute_query('delete_job',False,**mapping_job)
+        database_connection.execute_query('insert_job',False,**mapping_job)
     except ResourceClosedError:
         pass
-    database_connection.execute_query('insert_job',False,**mapping_job)
-    job_lock.release()
-    return dict()
+    finally:
+        job_lock.release()
+    return str()
 
 def get_job_mapping(credentials_factory: CredentialsFactory, arguments: Dict[str,Union[str, List[Dict[str,str]]]])-> dict:
     user_id_owner = credentials_factory.get_user_id(arguments['first_name_owner'],arguments['last_name_owner'])
@@ -302,9 +318,11 @@ def insert_pictures_job(credentials_factory: CredentialsFactory, database_connec
         )
     update_picture_mapping_with_optional_information()
     picture_lock.acquire()
-    for mapping_picture in mapping_pictures:
-        database_connection.execute_query('insert_picture_user',False,**mapping_picture)
-    picture_lock.release()
+    try:
+        for mapping_picture in mapping_pictures:
+            database_connection.execute_query('insert_picture_user',False,**mapping_picture)
+    finally:
+        picture_lock.release()
 
 def get_pictures_mapping_job(credentials_factory: CredentialsFactory, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
     picture_dicts = cast(List[Dict[str, str]], arguments['picture'])
@@ -352,8 +370,10 @@ def insert_labels_job(credentials_factory: CredentialsFactory, database_connecti
             '{label_list}': ",".join(label_list)
         }
         label_job_lock.acquire()
-        database_connection.execute_query('insert_labels_job',False, **mapping)
-        label_job_lock.release()
+        try:
+            database_connection.execute_query('insert_labels_job',False, **mapping)
+        finally:
+            label_job_lock.release()
     else:
         label_name = arguments['labels'][0]['label_name']
         mapping = {
@@ -361,8 +381,10 @@ def insert_labels_job(credentials_factory: CredentialsFactory, database_connecti
             '{label_name}': f"'{label_name}'"
         }
         label_job_lock.acquire()
-        database_connection.execute_query('insert_label_job', False, **mapping)
-        label_job_lock.release()
+        try:
+            database_connection.execute_query('insert_label_job', False, **mapping)
+        finally:
+            label_job_lock.release()
 
 def get_change_job_title_mapping(credentials_factory:CredentialsFactory, arguments:[Dict[str,Union[str, List[Dict[str,str]]]]]):
     user_id_owner = credentials_factory.get_user_id(arguments['first_name_owner'], arguments['last_name_owner'])
