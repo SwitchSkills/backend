@@ -418,15 +418,18 @@ def search_user_mapping_and_query(arguments:[Dict[str,Union[str, List[Dict[str,s
         '{user_additional_information}': read_sql_file('user_additional_information', True),
         '{region_id_list}': read_sql_file('all_regions', True)
     }
-
+    if login:
+        base_string = "= '{content}'"
+    else:
+        base_string = "LIKE '%{content}%'"
     search_query = 'search_users_on_' + arguments['type']
     if arguments['type'] == 'full_name':
         mapping.update({
-            '{search_first_name}': arguments['first_name'] if arguments.get('first_name') else str(),
-            '{search_last_name}': arguments['last_name'] if arguments.get('last_name') else str()
+            '{search_first_name}': base_string.format(content = arguments['first_name']) if arguments.get('first_name') else base_string.format(content = str()),
+            '{search_last_name}': base_string.format(content = arguments['last_name']) if arguments.get('last_name') else base_string.format(content=str())
         })
     else:
         mapping.update({
-            '{search}': arguments['search']
+            '{search}': base_string.format(content = arguments['search'])
         })
     return mapping, search_query

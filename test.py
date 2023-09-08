@@ -467,7 +467,7 @@ def test_login():
     arguments = {
         'type': 'full_name',
         'password': 'NationBuilders',
-        'first_name': 'wrong user',
+        'first_name': 'Natio',
         'last_name': 'Builder'
     }
     r = requests.get('http://127.0.0.1:8080/login', json=arguments)
@@ -485,4 +485,5 @@ def test_login():
     print(r.json())
     print('______________________________________________')
 if __name__ == '__main__':
+    test_search_users()
     test_login()

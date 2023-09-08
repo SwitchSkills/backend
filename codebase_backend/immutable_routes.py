@@ -584,7 +584,8 @@ def search_users():
 """
 path "/login" will verify the user. Expecting following dictionary in JSON:
 type (full_name, bibliography, email_address, phone_number)
-(following key is depending on type) (everything can be substring)
+password
+(following key is depending on type)
 first_name (one or both)
 last_name (one or both)
 OR
@@ -594,7 +595,6 @@ search = email
 OR
 search = phone_number 
 
-password
 REQUIREMENTS:
 /
 ON BREAK: (dictionary)
