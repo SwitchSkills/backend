@@ -13,7 +13,8 @@ from sql_files.sql_helper_functions import read_sql_file
 
 
 class DatabaseConnector(metaclass=SingletonMeta):
-
+    _remove_keys_user = ['region_name','country','label_name','label_description']
+    _remove_keys_job = ['label_name','label_description','picture_location_firebase','picture_description']
     def __init__(self,config:ConfigWrapper, database_engine):
         self._config = config
         self._db_engine = database_engine
@@ -167,54 +168,64 @@ class DatabaseConnector(metaclass=SingletonMeta):
         job_ids = list()
         tmp = list()
         for job in jobs:
-            if id := job['job_id'] != job_ids:
-                job_ids.append(id)
+            if job['job_id'] not in job_ids:
+                job_ids.append(job['job_id'])
                 tmp_job = job.copy()
-                tmp_job['pictures'] = [{
-                    'picture_location_firebase': job['picture_location_firebase'],
-                    'picture_description': job['picture_description']
-                }]
+                for key in self._remove_keys_job:
+                    del tmp_job[key]
+                if job['picture_location_firebase']:
+                    tmp_job['pictures'] = [{
+                        'picture_location_firebase': job['picture_location_firebase'],
+                        'picture_description': job['picture_description']
+                    }]
                 tmp_job['labels'] = [{
                     'label_name': job['label_name'],
                     'label_description': job['label_description']
                 }]
                 tmp.append(tmp_job)
             else:
-                duplicate_job = tmp[job_ids.index(id)]
-                duplicate_job['pictures'].append({
-                    'picture_location_firebase': job['picture_location_firebase'],
-                    'picture_description': job['picture_description']
-                })
-                duplicate_job['labels'].append({
-                    'label_name': job['label_name'],
-                    'label_description': job['label_description']
-                })
+                duplicate_job = tmp[job_ids.index(job['job_id'])]
+                if job['picture_location_firebase'] and job['picture_location_firebase'] not in [picture['picture_location_firebase'] for picture in duplicate_job['pictures']]:
+                    duplicate_job['pictures'].append({
+                        'picture_location_firebase': job['picture_location_firebase'],
+                        'picture_description': job['picture_description']
+                    })
+                if job['label_name'] not in [label['label_name'] for label in duplicate_job['labels']]:
+                    duplicate_job['labels'].append({
+                        'label_name': job['label_name'],
+                        'label_description': job['label_description']
+                    })
         return tmp
 
     def group_attributes_user(self,users) -> List[Dict[str,str]]:
         user_ids = list()
         tmp = list()
         for user in users:
-            if id := user['user_id'] != user_ids:
-                user_ids.append(id)
+            if user['user_id'] not in user_ids:
+                user_ids.append(user['user_id'])
                 tmp_user = user.copy()
+
+                for key in self._remove_keys_user:
+                    del tmp_user[key]
                 tmp_user['regions'] = [{
                     'region_name': user['region_name'],
                     'country': user['country']
                 }]
-                tmp_user['labels'] = [{
-                    'label_name': user['label_name'],
-                    'label_description': user['label_description']
-                }]
+                if user['label_name']:
+                    tmp_user['labels'] = [{
+                        'label_name': user['label_name'],
+                        'label_description': user['label_description']
+                    }]
                 tmp.append(tmp_user)
             else:
-                duplicate_user = tmp[user_ids.index(id)]
+                duplicate_user = tmp[user_ids.index(user['user_id'])]
                 duplicate_user['regions'].append({
                     'region_name': user['region_name'],
                     'country': user['country']
                 })
-                duplicate_user['labels'].append({
-                    'label_name': user['label_name'],
-                    'label_description': user['label_description']
-                })
+                if user['label_name'] and user['label_name'] not in [label['label_name'] for label in duplicate_user['labels']]:
+                    duplicate_user['labels'].append({
+                        'label_name': user['label_name'],
+                        'label_description': user['label_description']
+                    })
         return tmp

@@ -119,7 +119,8 @@ def test_search_users():
             arguments.update({'search': search})
         else:
             arguments.update({
-                'last_name': 'Build'
+                'fist_name': 'Nation',
+                'last_name': 'Builder'
             })
 
         r = requests.get('http://127.0.0.1:8080/search_users', json=arguments)
@@ -442,7 +443,46 @@ def test_all_regions():
     print(r.json())
     print('______________________________________________')
 
+def test_login():
 
+    diff_types = ['full_name', 'email_address', 'phone_number']
+    diff_search = [None, 'nation.builder.team@gmail.com', '+919216753560']
+    for type, search in zip(diff_types, diff_search):
+        arguments = {
+            'type': type,
+            'password': 'NationBuilders'
+        }
+        if type != 'full_name':
+            arguments.update({'search': search})
+        else:
+            arguments.update({
+                'first_name': 'Nation',
+                'last_name': 'Builder'
+            })
+
+        r = requests.get('http://127.0.0.1:8080/login', json=arguments)
+        print(f'LOGIN:{type}')
+        print(r.json())
+        print('______________________________________________')
+    arguments = {
+        'type': 'full_name',
+        'password': 'NationBuilders',
+        'first_name': 'wrong user',
+        'last_name': 'Builder'
+    }
+    r = requests.get('http://127.0.0.1:8080/login', json=arguments)
+    print(f'LOGIN: WRONG USER')
+    print(r.json())
+    print('______________________________________________')
+    arguments = {
+        'type': 'full_name',
+        'password': 'WrongPassword',
+        'first_name': 'Nation',
+        'last_name': 'Builder'
+    }
+    r = requests.get('http://127.0.0.1:8080/login', json=arguments)
+    print(f'LOGIN: WRONG PASSWORD')
+    print(r.json())
+    print('______________________________________________')
 if __name__ == '__main__':
-     test_all_labels()
-     test_all_regions()
+    test_login()

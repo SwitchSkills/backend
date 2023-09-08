@@ -8,7 +8,7 @@ from codebase_backend.CredentialsFactory import CredentialsFactory
 from codebase_backend.DatabaseConnector import DatabaseConnector
 from codebase_backend.semaphores import user_lock, picture_lock, region_lock, job_lock, label_user_lock, \
     label_job_lock
-from sql_files.sql_helper_functions import get_sql_list
+from sql_files.sql_helper_functions import get_sql_list, read_sql_file
 
 
 def verify_labels(database_connection:DatabaseConnector, arguments: Dict[str,Union[str, List[Dict[str,str]]]]) -> list:
@@ -410,3 +410,23 @@ def get_change_job_region_mapping(credentials_factory:CredentialsFactory, argume
         '{new_region_id}': f"'{new_region_id}'",
         '{new_job_id}': f"'{new_job_id}'"
     }
+
+
+def search_user_mapping_and_query(arguments:[Dict[str,Union[str, List[Dict[str,str]]]]], login= False):
+    mapping = {
+        '{users_in_region}': read_sql_file('users_in_region') if not login else read_sql_file('login'),
+        '{user_additional_information}': read_sql_file('user_additional_information', True),
+        '{region_id_list}': read_sql_file('all_regions', True)
+    }
+
+    search_query = 'search_users_on_' + arguments['type']
+    if arguments['type'] == 'full_name':
+        mapping.update({
+            '{search_first_name}': arguments['first_name'] if arguments.get('first_name') else str(),
+            '{search_last_name}': arguments['last_name'] if arguments.get('last_name') else str()
+        })
+    else:
+        mapping.update({
+            '{search}': arguments['search']
+        })
+    return mapping, search_query

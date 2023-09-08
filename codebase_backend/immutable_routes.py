@@ -3,11 +3,9 @@ import json
 
 from codebase_backend import app, logger, credentials_factory, database_connection
 from codebase_backend.decorators import catch_sever_crash
-from sql_files.sql_helper_functions import get_sql_list, read_sql_file
+from codebase_backend.helper_functions import search_user_mapping_and_query
+from sql_files.sql_helper_functions import get_sql_list
 
-@app.route('/')
-def home():
-  return 'Hello World'
 
 """
 path "/activity_feed" will return the content for the mainscreen: all open jobs and completed jobs 
@@ -570,21 +568,7 @@ def search_users():
     # (full_name, bibliography, email_address, phone_number)
     arguments = request.get_json()
     try:
-        mapping = {
-            '{users_in_region}': read_sql_file('users_in_region'),
-            '{user_additional_information}': read_sql_file('user_additional_information', True),
-            '{region_id_list}': read_sql_file('all_regions', True)
-        }
-        search_query = 'search_users_on_' + arguments['type']
-        if arguments['type'] == 'full_name':
-            mapping.update({
-                '{search_first_name}': arguments['first_name'] if arguments.get('first_name') else str(),
-                '{search_last_name}': arguments['last_name'] if arguments.get('last_name') else str()
-            })
-        else:
-            mapping.update({
-                '{search}': arguments['search']
-            })
+        mapping, search_query = search_user_mapping_and_query(arguments)
     except KeyError as e:
         logger.error(f"id: {g.execution_id}\n KEY ERROR: {e}")
         return json.dumps(
@@ -597,7 +581,89 @@ def search_users():
     result = database_connection.group_attributes_user(result)
     return json.dumps({'code': 200, 'message': result}, default=str)
 
+"""
+path "/login" will verify the user. Expecting following dictionary in JSON:
+type (full_name, bibliography, email_address, phone_number)
+(following key is depending on type) (everything can be substring)
+first_name (one or both)
+last_name (one or both)
+OR
+search = bibliography 
+OR
+search = email 
+OR
+search = phone_number 
 
+password
+REQUIREMENTS:
+/
+ON BREAK: (dictionary)
+code 400 (client error)
+message (str)
+ON NOT SUCCESSFUL (dictionary)
+code 500 (server error)
+ON SUCCESS (list of dictionaries dictionary) (can be empty list)
+regions (list_of_dictionaries)
+    region_name (str)
+    country (str)
+picture [OPTIONAL] (dictionary) 
+    picture_location_firebase 
+    picture_description [OPTIONAL]
+labels (list_of_dictionaries)
+    labels.label_name
+    labels.description [OPTIONAL]
+user
+    first_name
+    last_name
+    email_address
+    alternative_communication [OPTIONAL]
+    phone_number
+    user_location
+"""
+
+
+@app.route('/login', methods=['GET', 'POST'])
+@catch_sever_crash
+def login():
+    # (full_name, bibliography, email_address, phone_number)
+    arguments = request.get_json()
+    try:
+        mapping, search_query = search_user_mapping_and_query(arguments, login=True)
+    except KeyError as e:
+        logger.error(f"id: {g.execution_id}\n KEY ERROR: {e}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"following key error: {e}"
+            }
+        )
+    result = database_connection.execute_query(search_query, **mapping)
+    result = database_connection.group_attributes_user(result)
+    print(result)
+    if not result:
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"user does not exists!\n arguments: {arguments}"
+            }
+        )
+    elif len(result) != 1:
+        return json.dumps(
+            {
+                'code': 500,
+                'message': f"Something went wrong with db, returned multiple users!\n arguments: {arguments} \n result: {result}"
+            }
+        )
+
+    user = result[0]
+    if credentials_factory.hash_string(arguments['password']) != user['password']:
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"invalid password!"
+            }
+        )
+    return json.dumps({'code': 200, 'message': result}, default=str)
 """
 path "/match_jobs" will return the jobs that are a match for the user: ordered by match quality sub-ordered on time 
 (earliest will be index 0). Expecting following dictionary in JSON:

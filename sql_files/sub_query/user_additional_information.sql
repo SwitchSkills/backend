@@ -1,5 +1,5 @@
 relevant_pictures AS (
-SELECT
+SELECT DISTINCT
     relevant_users.user_id,
     picture.picture_location_firebase,
     picture.description AS picture_description
@@ -8,7 +8,7 @@ JOIN relevant_users ON
     relevant_users.user_id = picture.user_id
     ),
 relevant_labels AS (
-SELECT
+SELECT DISTINCT
     relevant_users.user_id,
     labels.label_name,
     labels.description AS label_description
