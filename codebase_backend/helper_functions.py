@@ -37,16 +37,20 @@ def verify_regions(credentials_factory: CredentialsFactory, database_connection:
         return list()
 
 
-def get_user_mapping(credentials_factory: CredentialsFactory, arguments: Dict[str,Union[str, List[Dict[str,str]]]])-> dict:
-    return {
+def get_user_mapping(database_connection:DatabaseConnector,credentials_factory: CredentialsFactory, arguments: Dict[str,Union[str, List[Dict[str,str]]]])-> dict:
+    tmp = {
         '{user_id}': f"'{credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])}'",
         '{first_name}': f"'{arguments['first_name']}'",
         '{last_name}': f"'{arguments['last_name']}'",
         '{email_address}': f"'{arguments['email_address']}'",
         '{phone_number}': f"'{arguments['phone_number']}'",
-        '{password}': f"'{credentials_factory.hash_string(arguments['password'])}'",
         '{location}': f"'{arguments['location']}'"
     }
+    if arguments.get('password'):
+        tmp['{password}'] = f"'{credentials_factory.hash_string(arguments['password'])}'"
+    else:
+        tmp['{password}'] = f"'{database_connection.execute_query('get_password', **tmp)[0]['password']}'"
+    return tmp
 
 
 def update_user_mapping_with_optional_information(mapping: Dict[str,str], arguments: Dict[str,Union[str, List[Dict[str,str]]]]) -> None:
@@ -110,7 +114,7 @@ def verify_and_insert_user(credentials_factory: CredentialsFactory ,database_con
                            f"verified_labels:{[(region['country'],region['region_name']) for region in verified_regions]}"
             })
 
-        mapping_user = get_user_mapping(credentials_factory,arguments)
+        mapping_user = get_user_mapping(database_connection,credentials_factory,arguments)
     except KeyError as e:
         return json.dumps(
             {

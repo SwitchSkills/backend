@@ -179,7 +179,6 @@ def test_insert_or_update_user():
             'picture_location_firebase': 'test_location_user',
             'description': 'testing purposes'
         },
-        'password': 'test_for_dummies',
         'location': 'bib :(',
         'labels': [{
             'label_name': 'bicycle repair'
@@ -510,4 +509,4 @@ def remove_user():
     print('______________________________________________')
 
 if __name__ == '__main__':
-    test_active_jobs_in_regions()
+    test_insert_or_update_user()
