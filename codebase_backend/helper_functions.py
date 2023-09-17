@@ -4,6 +4,7 @@ from typing import Dict, Any, Union, List, cast
 import pymysql.err
 from sqlalchemy.exc import ResourceClosedError
 
+from codebase_backend import logger
 from codebase_backend.CredentialsFactory import CredentialsFactory
 from codebase_backend.DatabaseConnector import DatabaseConnector
 from codebase_backend.semaphores import user_lock, picture_lock, region_lock, job_lock, label_user_lock, \
@@ -92,13 +93,14 @@ def update_user_mapping_with_optional_information(mapping: Dict[str,str], argume
 
 def verify_and_insert_user(credentials_factory: CredentialsFactory ,database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]) -> str:
     try:
-        if verified_labels := verify_labels(database_connection,arguments):
-            return json.dumps({
-                'code': 400,
-                'message': f"invalid labels!\n"
-                           f"given_labels:{[label['label_name'] for label in arguments['labels']]}\n"
-                           f"verified_labels:{verified_labels}"
-            })
+        if arguments.get('labels'):
+            if verified_labels := verify_labels(database_connection,arguments):
+                return json.dumps({
+                    'code': 400,
+                    'message': f"invalid labels!\n"
+                               f"given_labels:{[label['label_name'] for label in arguments['labels']]}\n"
+                               f"verified_labels:{verified_labels}"
+                })
 
         if verified_regions := verify_regions(credentials_factory,database_connection,arguments):
             return json.dumps({
@@ -151,7 +153,7 @@ def update_picture_mapping_with_optional_information(mapping_picture: Dict[str,s
                 '{description_content}': str()
             }
         )
-def insert_picture_user(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
+def insert_picture_user(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]) -> str:
 
     try:
         mapping_picture = get_picture_mapping(credentials_factory,arguments)
@@ -168,7 +170,7 @@ def insert_picture_user(credentials_factory: CredentialsFactory, database_connec
         database_connection.execute_query('insert_picture',False,**mapping_picture)
     finally:
         picture_lock.release()
-
+    return str()
 def insert_labels_user(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
     user_id = credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])
     if len(arguments["labels"])> 1:
@@ -259,6 +261,14 @@ def verify_and_insert_job(credentials_factory: CredentialsFactory ,database_conn
             }
         )
     update_job_mapping_with_optional_information(mapping_job,arguments)
+    if database_connection.execute_query('search_completed_job', **mapping_job):
+        logger.error(f"id: {g.execution_id}\n job is pending or completed: {mapping_job['{job_id}']}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"job is pending or completed: {mapping_job['{job_id}']}"
+            }
+        )
     job_lock.acquire()
     try:
         database_connection.execute_query(['delete_job','insert_job'],False,**mapping_job)
@@ -302,7 +312,7 @@ def update_job_mapping_with_optional_information(mapping,arguments :  Dict[str,U
             '{datetime_expires_utc_content}': str()
         })
 
-def insert_pictures_job(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector,arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
+def insert_pictures_job(credentials_factory: CredentialsFactory, database_connection: DatabaseConnector,arguments:Dict[str,Union[str, List[Dict[str,str]]]]) -> str:
     try:
         mapping_pictures = get_pictures_mapping_job(credentials_factory,arguments)
     except KeyError as e:
@@ -312,17 +322,18 @@ def insert_pictures_job(credentials_factory: CredentialsFactory, database_connec
                 'message': f"following key error: {e}"
             }
         )
-    update_picture_mapping_with_optional_information()
     picture_lock.acquire()
     try:
-        for mapping_picture in mapping_pictures:
-            database_connection.execute_query('insert_picture_user',False,**mapping_picture)
+        for mapping_picture, picture_argument in zip(mapping_pictures, arguments['pictures']):
+            update_picture_mapping_with_optional_information(mapping_picture, {'picture':picture_argument})
+            database_connection.execute_query('insert_picture',False,**mapping_picture)
     finally:
         picture_lock.release()
+    return str()
 
 def get_pictures_mapping_job(credentials_factory: CredentialsFactory, arguments:Dict[str,Union[str, List[Dict[str,str]]]]):
-    picture_dicts = cast(List[Dict[str, str]], arguments['picture'])
-    user_id_owner = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
+    picture_dicts = cast(List[Dict[str, str]], arguments['pictures'])
+    user_id_owner = credentials_factory.get_user_id(arguments['first_name_owner'], arguments['last_name_owner'])
     region_id = credentials_factory.get_region_id(cast(Dict[str, str], arguments['region'])['country'],
                                                   cast(Dict[str, str], arguments['region'])['region_name'])
     return [{
@@ -330,8 +341,8 @@ def get_pictures_mapping_job(credentials_factory: CredentialsFactory, arguments:
         '{picture_location_firebase}': f"'{picture_dict['picture_location_firebase']}'",
         '{user_id_key}': str(),
         '{user_id_content}': str(),
-        '{job_id_key}': 'job_id',
-        '{job_id_content}': f"'{credentials_factory.get_job_id(arguments['title'],user_id_owner,region_id)}'"
+        '{job_id_key}': ',job_id',
+        '{job_id_content}': f",'{credentials_factory.get_job_id(arguments['title'],user_id_owner,region_id)}'"
     } for picture_dict in picture_dicts]
 
 def update_picture_job_mapping_with_optional_information(mapping_pictures: List[Dict[str,str]], arguments:[Dict[str,Union[str, List[Dict[str,str]]]]]):

@@ -41,9 +41,9 @@ class DatabaseConnector(metaclass=SingletonMeta):
         if fetch_query or type(filename) == str:
             return self._fetch_execute_query(cast(str,filename),fetch_query,**kwargs)
         elif type(filename) == str:
-            self._fetch_execute_query(filename, fetch_query, **kwargs)
+            self._delete_and_insert_query([filename], **kwargs)
         else:
-            self._delete_and_insert_query(filename,**kwargs)
+            self._delete_and_insert_query(filename, **kwargs)
 
     def _fetch_execute_query(self,filename:str,fetch_query = True, **kwargs) -> List[Dict[str,Any]]:
 

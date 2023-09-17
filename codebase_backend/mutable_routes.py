@@ -9,8 +9,7 @@ from codebase_backend.decorators import catch_sever_crash
 from codebase_backend.helper_functions import verify_and_insert_user, get_change_user_name_mapping, insert_picture_user, \
     insert_regions_user, insert_labels_user, verify_and_insert_job, insert_pictures_job, insert_labels_job, \
     get_change_job_title_mapping, verify_regions, get_change_job_region_mapping, no_none_check_dict
-from codebase_backend.semaphores import user_lock, completed_job_lock, liked_job_lock
-
+from codebase_backend.semaphores import user_lock, completed_job_lock, liked_job_lock, job_lock
 
 """
 path "/user" will add a user to the database OR update existing user using (first_name, last_name) key, 
@@ -64,9 +63,10 @@ def user():
         return error_message
 
     if arguments.get('picture'):
-        insert_picture_user(credentials_factory, database_connection, arguments)
-
-    insert_labels_user(credentials_factory, database_connection, arguments)
+        if error_message := insert_picture_user(credentials_factory, database_connection, arguments):
+            return error_message
+    if arguments.get('labels'):
+        insert_labels_user(credentials_factory, database_connection, arguments)
     insert_regions_user(credentials_factory, database_connection, arguments)
 
     return json.dumps({'code': 200})
@@ -133,7 +133,7 @@ first_name_owner [KEY]
 last_name_owner [KEY]
 labels (list of dictionaries)
     label_name (str)
-picture [OPTIONAL] (list of dictionary)
+pictures [OPTIONAL] (list of dictionary)
     picture_location_firebase (str: download url)
     description [OPTIONAL] (str)
 REQUIREMENTS:
@@ -141,6 +141,7 @@ title UNIQUE
 user exists
 region exists
 label exists
+job is not pending or completed
 ON BREAK: (dictionary)
 code 400 (client error)
 message (str)
@@ -162,14 +163,16 @@ def job():
                 'code': 400,
                 'message': f"input failed none check:\n arguments: {arguments}"
             })
+
     arguments.update({
         'regions': [arguments['region']]  # recycle check code from user regions
     })
     if error_message := verify_and_insert_job(credentials_factory, database_connection, arguments):
         return error_message
 
-    if arguments.get('picture'):
-        insert_pictures_job(credentials_factory, database_connection, arguments)
+    if arguments.get('pictures'):
+        if error_message := insert_pictures_job(credentials_factory, database_connection, arguments):
+            return error_message
 
     insert_labels_job(credentials_factory, database_connection, arguments)
     return json.dumps({'code': 200})
@@ -227,6 +230,14 @@ def change_job_title():
             {
                 'code': 400,
                 'message': f"following key error: {e}"
+            }
+        )
+    if database_connection.execute_query('search_completed_job', **{'{job_id}': mapping['{existing_job_id}']}):
+        logger.error(f"id: {g.execution_id}\n job is pending or completed: {mapping['{existing_job_id}']}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"job is pending or completed: {mapping['{existing_job_id}']}"
             }
         )
     user_lock.acquire()
@@ -287,6 +298,14 @@ def change_job_region():
             {
                 'code': 400,
                 'message': f"following key error: {e}"
+            }
+        )
+    if database_connection.execute_query('search_completed_job', **{'{job_id}': mapping['{existing_job_id}']}):
+        logger.error(f"id: {g.execution_id}\n job is pending or completed: {mapping['{existing_job_id}']}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"job is pending or completed: {mapping['{existing_job_id}']}"
             }
         )
     user_lock.acquire()
@@ -597,8 +616,124 @@ def user_completed_job():
     database_connection.execute_query('insert_completed_job',False, **mapping)
     completed_job_lock.release()
     return json.dumps({'code': 200})
+"""
+path "/remove_job" will remove a job out of database. Expecting following dictionary in JSON format
+first_name (str)
+last_name (str)
+title (str)
+job_region (dictionary)
+    country,
+    region_name
+REQUIREMENTS:
+job exists
+job not pending in completion or already completed
+previous accepted call has been made for this job and user combination
+ON BREAK: (dictionary)
+code 400 (client error)
+message (str)
+ON NOT SUCCESSFUL (dictionary)
+code 500 (server error)
+ON SUCCESS (dictionary)
+code 200
+"""
+@app.route('/remove_job',methods=['GET', 'POST'])
+@catch_sever_crash
+def remove_job():
+    arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
+    arguments.update({
+        'regions': [arguments['job_region']]  # recycle check code from user regions
+    })
+    if verified_regions := verify_regions(credentials_factory, database_connection, arguments):
+        return json.dumps({
+            'code': 400,
+            'message': f"invalid regions!\n"
+                       f"given_regions:{[(region['country'], region['region_name']) for region in arguments['regions']]}\n"
+                       f"verified_labels:{[(region['country'], region['region_name']) for region in verified_regions]}"
+        })
 
+    try:
+        user_id_owner = credentials_factory.get_user_id(arguments['first_name'], arguments['last_name'])
+        region_id = credentials_factory.get_region_id(cast(Dict[str, str], arguments['job_region'])['country'],
+                                                      cast(Dict[str, str], arguments['job_region'])['region_name'])
+        job_id = credentials_factory.get_job_id(arguments['title'], user_id_owner, region_id)
+        mapping = {
+            '{job_id}': f"'{job_id}'"
+        }
+    except KeyError as e:
+        logger.error(f"id: {g.execution_id}\n KEY ERROR: {e}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"following key error: {e}"
+            }
+        )
+    if database_connection.execute_query('search_completed_job', **mapping):
+        logger.error(f"id: {g.execution_id}\n job is pending or completed: {job_id}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"job is pending or completed: {job_id}"
+            }
+        )
+    try:
+        job_lock.acquire()
+        database_connection.execute_query('delete_job',False,**mapping)
+    finally:
+        job_lock.release()
 
+    return json.dumps({'code': 200})
+"""
+path "/remove_job" will remove a job out of database. Expecting following dictionary in JSON format
+first_name (str)
+last_name (str)
+REQUIREMENTS:
+job exists
+job not pending in completion or already completed
+previous accepted call has been made for this job and user combination
+ON BREAK: (dictionary)
+code 400 (client error)
+message (str)
+ON NOT SUCCESSFUL (dictionary)
+code 500 (server error)
+ON SUCCESS (dictionary)
+code 200
+"""
+@app.route('/remove_user',methods=['GET', 'POST'])
+@catch_sever_crash
+def remove_user():
+    arguments = request.get_json()
+    if not no_none_check_dict(arguments):
+        logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"input failed none check:\n arguments: {arguments}"
+            })
+    try:
+        mapping = {
+            '{user_id}' : f"'{credentials_factory.get_user_id(arguments['first_name'],arguments['last_name'])}'"
+        }
+    except KeyError as e:
+        logger.error(f"id: {g.execution_id}\n KEY ERROR: {e}")
+        return json.dumps(
+            {
+                'code': 400,
+                'message': f"following key error: {e}"
+            }
+        )
+    try:
+        user_lock.acquire()
+        database_connection.execute_query('delete_user',False,**mapping)
+    finally:
+        user_lock.release()
+    return json.dumps({'code': 200})
 """
 path "/user_not_completed_job" will mark an accepted job in the database as not completed by a user. Expecting following dictionary in JSON format
 first_name (str)
@@ -662,9 +797,11 @@ def user_not_completed_job():
                 'message': f"following key error: {e}"
             }
         )
-    completed_job_lock.acquire()
-    database_connection.execute_query('delete_accepted_job',False, **mapping)
-    completed_job_lock.release()
+    try:
+        completed_job_lock.acquire()
+        database_connection.execute_query('delete_accepted_job',False, **mapping)
+    finally:
+        completed_job_lock.release()
     return json.dumps({'code': 200})
 
 
@@ -732,7 +869,9 @@ def user_received_rating():
                 'message': f"following key error: {e}"
             }
         )
-    user_lock.acquire()
-    database_connection.execute_query('update_rating_user',False,**mapping)
-    user_lock.release()
+    try:
+        user_lock.acquire()
+        database_connection.execute_query('update_rating_user',False,**mapping)
+    finally:
+        user_lock.release()
     return json.dumps({'code': 200})

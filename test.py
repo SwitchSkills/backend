@@ -15,10 +15,7 @@ def test_activity_feed():
 
 
 def test_active_jobs_in_regions():
-    arguments = [{
-        'country': 'Belgium',
-        'region_name': 'Brussels Capital Region'
-    },
+    arguments = [
         {
             'country': 'Belgium',
             'region_name': 'West Flanders'
@@ -144,12 +141,12 @@ def test_insert_or_update_user():
     arguments = {
         'first_name': 'Dag',
         'last_name': 'Malstaf',
-        'email_address': 'study_boy@gmail.com',
+        'email_address': 'working_tourist@gmail.com',
         'phone_number': '+32471785072',
         'alternative_communications': 'https://www.linkedin.com/in/dag-malstaf/',
         'bibliography': 'killing other CS students with gracefulness',
         'picture': {
-            'picture_location_firebase': 'test_location',
+            'picture_location_firebase': 'test_location_user',
             'description': 'testing purposes'
         },
         'password': 'test_for_dummies',
@@ -174,12 +171,12 @@ def test_insert_or_update_user():
     arguments = {
         'first_name': 'Dag',
         'last_name': 'Malstaf',
-        'email_address': 'study_boy@gmail.com',
+        'email_address': 'working_tourist@gmail.com',
         'phone_number': '+32471785072',
         'alternative_communications': 'https://www.linkedin.com/in/dag-malstaf/',
         'bibliography': 'killing other CS students with gracefulness',
         'picture': {
-            'picture_location_firebase': 'test_location',
+            'picture_location_firebase': 'test_location_user',
             'description': 'testing purposes'
         },
         'password': 'test_for_dummies',
@@ -228,10 +225,10 @@ def test_insert_or_update_job():
     arguments = {
         'title': 'repair of bike',
         'description': 'testing and crying at the same time => I am a multitasker!!!',
-        'picture': {
+        'pictures': [{
             'picture_location_firebase': 'test_location_job',
             'description': 'testing purposes job'
-        },
+        }],
         'location': 'idk',
         'labels': [{
             'label_name': 'bicycle repair'
@@ -252,10 +249,13 @@ def test_insert_or_update_job():
     arguments = {
         'title': 'repair of bike',
         'description': 'testing and crying at the same time => I am a multitasker!!!',
-        'picture': {
-            'picture_location_firebase': 'test_location_job',
+        'pictures': [{
+            'picture_location_firebase': 'test_location_job2',
             'description': 'testing purposes job'
-        },
+        },{
+            'picture_location_firebase': 'test2_after_flutter_error',
+            'description': 'dag had malfunction'
+        }],
         'location': 'idk',
         'labels': [{
             'label_name': 'bicycle repair'
@@ -263,7 +263,7 @@ def test_insert_or_update_job():
             {'label_name': 'gardening'}],
         'region':
             {
-                'region_name': 'Brussels Capital Region',
+                'region_name': 'West Flanders',
                 'country': 'Belgium'
             },
         'first_name_owner': 'Nation',
@@ -274,7 +274,6 @@ def test_insert_or_update_job():
     print(r)
     print(r.json())
     print('______________________________________________')
-
 
 def test_change_job_title():
     arguments = {
@@ -484,5 +483,31 @@ def test_login():
     print(f'LOGIN: WRONG PASSWORD')
     print(r.json())
     print('______________________________________________')
+
+def remove_job():
+    arguments = {
+        'title': 'repair of chain of bike',
+        'job_region': {
+            'country': 'Belgium',
+            'region_name': 'Brussels Capital Region'
+        },
+        'first_name': 'Nation',
+        'last_name': 'Builder'
+    }
+    r = requests.post('http://127.0.0.1:8080/remove_job', json=arguments)
+    print('REMOVE JOB:')
+    print(r.json())
+    print('______________________________________________')
+
+def remove_user():
+    arguments = {
+        'first_name': 'Test',
+        'last_name': 'Profile'
+    }
+    r = requests.post('http://127.0.0.1:8080/remove_user', json=arguments)
+    print('REMOVE USER:')
+    print(r.json())
+    print('______________________________________________')
+
 if __name__ == '__main__':
-    test_activity_feed()
+    test_active_jobs_in_regions()
