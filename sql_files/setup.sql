@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS labels(
 
 CREATE TABLE IF NOT EXISTS picture(
     picture_id VARCHAR(200) PRIMARY KEY,
-    picture_location_firebase  VARCHAR(200) NOT NULL,
+    picture_location_firebase  VARCHAR(1000) NOT NULL,
     description LONGTEXT DEFAULT NULL,
     user_id VARCHAR(200) UNIQUE DEFAULT NULL ,
     job_id VARCHAR(200) DEFAULT NULL ,

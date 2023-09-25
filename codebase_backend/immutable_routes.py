@@ -540,7 +540,7 @@ owner
 @catch_sever_crash
 def search_jobs():
     arguments = request.get_json()
-    if not no_none_check_list_of_dict(arguments):
+    if not no_none_check_dict(arguments):
         logger.error(f"id: {g.execution_id}\n FAILED NONE CHECK:\n arguments: {arguments}")
         return json.dumps(
             {

@@ -509,4 +509,4 @@ def remove_user():
     print('______________________________________________')
 
 if __name__ == '__main__':
-    test_insert_or_update_user()
+    test_search_jobs()
